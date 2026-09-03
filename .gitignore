@@ -3,8 +3,10 @@ build/
 *.log
 .DS_Store
 
-# Local Claude Code tooling
+# Local agent tooling and skill-manager artifacts
 .claude/
+.agents/
+skills-lock.json
 
 # Local secrets — never commit (the template is tracked deliberately)
 .env
