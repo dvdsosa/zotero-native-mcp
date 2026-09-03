@@ -14,7 +14,7 @@ probably can — so check before removing anything.
 Do not remove anything yet. Run both for a session:
 
 ```bash
-claude mcp add zotero-native-mcp -- npx -y zotero-native-mcp
+claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 
 Both servers expose tools named `zotero_*`, so your assistant will see two

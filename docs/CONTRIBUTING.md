@@ -17,7 +17,7 @@ Then point your own MCP client at your build, so you can use it while you work
 on it:
 
 ```bash
-claude mcp add zotero-dev -- node /absolute/path/to/build/index.js
+claude mcp add --scope user zotero-dev -- node /absolute/path/to/build/index.js
 ```
 
 While editing, `npm run watch` recompiles on save.

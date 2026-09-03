@@ -62,10 +62,10 @@ verified, and this table is the honest extent of it.
 
 | Component | Verified against |
 |---|---|
-| Operating system | **macOS 26.6** (Apple Silicon) and **Windows 11 Pro**, each against a real Zotero |
+| Operating system | **macOS 26.6** (Apple Silicon) and **Windows 11 Pro** build 26200 (x64), each against a real Zotero |
 | Zotero | 10.0.1 |
-| Node.js | 26.8 locally; 22, 24 and 26 in CI |
-| MCP client | Claude Code 2.1 |
+| Node.js | 26.8 on macOS, 22.23 on Windows; 22, 24 and 26 in CI |
+| MCP client | Claude Code 2.1, on both macOS and Windows |
 | Libraries | Personal **and** group — all 28 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
@@ -111,7 +111,7 @@ are the most useful issues this project can receive right now.
 ## Quick start
 
 ```bash
-claude mcp add zotero-native-mcp -- npx -y zotero-native-mcp
+claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 
 <details>
@@ -129,8 +129,12 @@ claude mcp add zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 </details>
 
-No environment variables are needed. Ask your assistant to run `zotero_status`
-to confirm the connection.
+`--scope user` registers it for every project. Without it, `claude mcp add`
+defaults to the *local* scope, which ties the server to the one directory you
+ran the command in — open anything else and the tools are simply absent.
+
+No environment variables are needed. Start a new session, then ask your
+assistant to run `zotero_status` to confirm the connection.
 
 The first time a tool **writes**, Zotero shows a dialog asking whether to allow
 it. Choose **"Always Allow"** so you are not asked again.

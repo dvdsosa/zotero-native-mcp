@@ -41,10 +41,15 @@ database files, so Zotero must be open whenever you use these tools.
 In a terminal, run:
 
 ```bash
-claude mcp add zotero-native-mcp -- npx -y zotero-native-mcp
+claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 
-Then start a new session so your assistant picks up the new tools.
+`--scope user` matters: without it the server is registered only for the
+directory you happened to be in, and it will look like it vanished the moment
+you open another folder.
+
+Then start a new session so your assistant picks up the new tools. In an
+already-running session, `/mcp` connects it without restarting.
 
 > Using Claude Desktop, Cursor, or another client? Add this to its MCP
 > configuration file instead:

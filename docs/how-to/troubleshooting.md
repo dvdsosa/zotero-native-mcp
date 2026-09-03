@@ -5,6 +5,32 @@ reachable, which version it is, and whether write access has been granted.
 
 > Check my Zotero connection status.
 
+## The tools do not appear at all
+
+Before suspecting Zotero: if your assistant has no `zotero_*` tools, the server
+was never loaded, and Zotero is not involved.
+
+**Registered in one directory only.** `claude mcp add` defaults to the *local*
+scope, which stores the server against the exact folder you ran it in. Open a
+different project — the repository itself rather than its parent, say — and the
+tools are gone. Check with `claude mcp list`, then re-register for every project:
+
+```bash
+claude mcp remove zotero-native-mcp
+claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
+```
+
+**Registered after the session started.** A running session does not pick up a
+newly added server. Run `/mcp` to connect it, or start a new session.
+
+**Disabled for this project.** If `/mcp` shows the server as disabled, it is
+listed in `disabledMcpServers` for that project in `~/.claude.json`. Re-enable it
+from the `/mcp` menu.
+
+Note that a server can be reachable and still absent from your session: running
+`node build/index.js` by hand, or `scripts/coverage.mjs`, proves the server
+works, not that your assistant has loaded it.
+
 ## "Cannot reach Zotero's local API"
 
 The server could not open a connection at all.
