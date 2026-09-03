@@ -141,6 +141,23 @@ describe('integration (live Zotero)', { skip: available ? false : 'Zotero is not
     assert.ok(result.isError);
   });
 
+  test('emptying the trash refuses a count the caller did not verify', async () => {
+    // Needs a live Zotero: the interlock can only compare against a real count.
+    const result = await client.callTool({
+      name: 'zotero_empty_trash',
+      arguments: { expectedCount: 987654 },
+    });
+    assert.ok(result.isError);
+    assert.match(result.content[0].text, /Refusing to empty the trash/);
+    assert.match(result.content[0].text, /zotero_list_trash/);
+  });
+
+  test('the trash lists without touching it', async () => {
+    const result = await call('zotero_list_trash', { limit: 5 });
+    assert.ok(Array.isArray(result.items));
+    assert.equal(typeof result.hasMore, 'boolean');
+  });
+
   test('libraries list includes the personal library', async () => {
     const result = await call('zotero_list_libraries');
     assert.ok(result.personalLibrary === null || typeof result.personalLibrary.id === 'number');

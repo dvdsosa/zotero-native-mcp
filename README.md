@@ -142,7 +142,7 @@ it. Choose **"Always Allow"** so you are not asked again.
 | 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Recover a deletion](docs/how-to/recover-deleted-items.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |
 | 📖 **[Reference](docs/reference.md)** | All 28 tools, parameters, outputs, limits, environment variables. |
 | 💡 **[Explanation](docs/explanation/)** | [Architecture](docs/explanation/architecture.md) · [Linked vs imported attachments](docs/explanation/attachments.md) · [How authorization works](docs/explanation/authorization.md) |
-| 🛠 **[Contributing](docs/CONTRIBUTING.md)** | Development setup, the 71-test suite, and exercising every tool against a live Zotero. |
+| 🛠 **[Contributing](docs/CONTRIBUTING.md)** | Development setup, the 72-test suite, and exercising every tool against a live Zotero. |
 
 ## Tools at a glance
 

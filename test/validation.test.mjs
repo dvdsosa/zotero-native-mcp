@@ -2,7 +2,9 @@
  * Argument validation exercised through a real MCP client over stdio.
  *
  * These paths all reject before the server contacts Zotero, so the suite runs
- * anywhere — no Zotero, no network. Testing them through the transport rather
+ * anywhere — no Zotero, no network. A test belongs here only if it holds with
+ * nothing listening on 127.0.0.1:23119; anything that needs a real library goes
+ * in integration.test.mjs instead. Testing them through the transport rather
  * than by reaching into the SDK's internals keeps the test honest: it fails if
  * the tool stops being reachable, not just if the function changes.
  */
@@ -108,10 +110,4 @@ test('emptying the trash requires an expected count', async () => {
     'the interlock must not be optional');
   // Omitting it is a schema error, so the call cannot be made carelessly.
   await expectError('zotero_empty_trash', {});
-});
-
-test('a wrong expected count refuses to empty anything', async () => {
-  const text = await expectError('zotero_empty_trash', { expectedCount: 987654 });
-  assert.match(text, /Refusing to empty the trash/);
-  assert.match(text, /zotero_list_trash/);
 });
