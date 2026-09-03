@@ -109,3 +109,19 @@ test('the default path lives under the XDG config directory', () => {
     else process.env.XDG_CONFIG_HOME = previous;
   }
 });
+
+test('the parent directory is derived with the platform separator', async () => {
+  // Regression: dirname was hand-rolled by searching for "/", so on Windows it
+  // returned "." and mkdir created the wrong directory, leaving set() to fail
+  // with ENOENT. Nesting two levels makes the failure unambiguous.
+  const dir = await mkdtemp(join(tmpdir(), 'zotero-keystore-sep-'));
+  const path = join(dir, 'one', 'two', 'keys.json');
+  try {
+    const store = new KeyStore(path);
+    await store.set('SERVER01', 'value');
+    assert.equal(await store.get('SERVER01'), 'value');
+    assert.ok((await stat(path)).isFile(), 'the nested file must exist on disk');
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

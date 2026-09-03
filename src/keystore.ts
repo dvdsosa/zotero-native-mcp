@@ -8,7 +8,7 @@
  */
 
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { mkdir, readFile, writeFile, chmod } from 'node:fs/promises';
 
 interface KeyStoreFile {
@@ -57,15 +57,11 @@ export class KeyStore {
   }
 
   private async persist(store: KeyStoreFile): Promise<void> {
-    await mkdir(dirOf(this.path), { recursive: true });
+    await mkdir(dirname(this.path), { recursive: true });
     await writeFile(this.path, JSON.stringify(store, null, 2), { encoding: 'utf8', mode: 0o600 });
     // writeFile's mode only applies on create; enforce it on existing files too.
     await chmod(this.path, 0o600).catch(() => {});
   }
-}
-
-function dirOf(path: string): string {
-  return path.slice(0, Math.max(0, path.lastIndexOf('/'))) || '.';
 }
 
 export function defaultKeyStorePath(): string {

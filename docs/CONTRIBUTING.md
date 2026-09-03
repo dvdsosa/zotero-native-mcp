@@ -62,7 +62,7 @@ npm run build
 npm test
 ```
 
-`npm test` runs 72 tests using `node:test`, which ships with Node — there is no
+`npm test` runs 73 tests using `node:test`, which ships with Node — there is no
 test framework to install. Five of the six suites need no Zotero at all, because
 `test-utils/mock-zotero.mjs` imitates Zotero's local API well enough to
 exercise the real protocol:
