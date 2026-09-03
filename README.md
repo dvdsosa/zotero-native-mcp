@@ -127,11 +127,52 @@ library you only have cloud access to, those projects remain the right choice.
 
 ## Contributing
 
-Issues and pull requests are welcome. `npm run typecheck && npm run build` must
-pass; `node scripts/smoke.mjs read` exercises the read tools against a live
-Zotero, and `node scripts/smoke.mjs write` the write path (it cleans up after
-itself). See [`evaluation/evaluation.xml`](evaluation/evaluation.xml) for
-question/answer pairs used to check real-world tool use.
+Issues and pull requests are welcome. CI runs `npm run typecheck`,
+`npm run build` and `npm test`; all three must pass.
+
+### Development
+
+```bash
+npm install
+npm run build       # compile to build/
+npm run watch       # compile on change
+npm run typecheck   # tsc --noEmit
+npm test            # the full suite
+npm run inspect     # build, then open the MCP Inspector
+```
+
+### Tests
+
+`npm test` runs 56 tests on `node:test`, with no test framework to install.
+
+| Suite | Covers |
+|---|---|
+| `test/format.test.mjs` | Response shaping and pagination arithmetic |
+| `test/config.test.mjs` | Environment parsing and defaults |
+| `test/keystore.test.mjs` | Key persistence, `0600` permissions, corrupt stores |
+| `test/client.test.mjs` | The wire protocol, against a mock Zotero |
+| `test/integration.test.mjs` | The real server over stdio, against a live Zotero |
+
+`test/helpers/mock-zotero.mjs` reproduces the `Zotero-Server-ID` handshake and
+local API keys, so the protocol is exercised in CI with no Zotero installed.
+The integration suite skips itself when Zotero is unreachable, which is why CI
+stays green on a runner.
+
+Two checks need a real Zotero and so are not part of `npm test`:
+
+```bash
+node scripts/smoke.mjs read    # read tools end to end
+node scripts/smoke.mjs write   # write path; needs a consent dialog, cleans up after itself
+```
+
+### Evaluating tool descriptions
+
+[`evaluation/evaluation.xml`](evaluation/evaluation.xml) holds 12 question and
+answer pairs for checking whether a model can actually drive these tools to a
+correct answer — a test of the tool *descriptions* rather than the code. Run it
+with the harness from Anthropic's `mcp-builder` skill, pointed at any
+Anthropic-compatible endpoint. See [`.env.example`](.env.example) for the
+variables it reads.
 
 ## License
 
