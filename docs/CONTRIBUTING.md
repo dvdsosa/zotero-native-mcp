@@ -4,6 +4,16 @@ Never contributed to an open-source project before? That is fine. This page is
 written to be followed in order, from cloning the repository to opening a pull
 request.
 
+**Just have a question?** Ask in
+[Discussions](https://github.com/dvdsosa/zotero-native-mcp/discussions) rather
+than opening an issue. Questions get answered faster there, and if it turns out
+to be a bug it can be promoted into one.
+
+**What to expect.** This is maintained by one person in their own time. Issues
+and pull requests are read, but a reply may take a week. A report that names its
+Zotero version, operating system and the full error text can often be answered
+in one round; one that does not usually takes three.
+
 ## 1. Get it running
 
 ```bash

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or help
+    url: https://github.com/dvdsosa/zotero-native-mcp/discussions
+    about: Anything that is not a bug or a feature request. Questions get answered faster here than in an issue.
+  - name: Troubleshooting guide
+    url: https://github.com/dvdsosa/zotero-native-mcp/blob/main/docs/how-to/troubleshooting.md
+    about: Connection failures, missing tools, authorization problems and full-text gaps are covered here.

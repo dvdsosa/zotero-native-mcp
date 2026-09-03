@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest a capability or an improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What you would like to be able to do
+      description: One or two sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem behind it
+      description: |
+        What are you trying to accomplish, and what makes it awkward or
+        impossible today? A concrete situation helps more than a feature name.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: A new tool, a parameter on an existing one, a different response shape. Mention alternatives you considered.
+
+  - type: checkboxes
+    id: feasibility
+    attributes:
+      label: Feasibility
+      description: |
+        Some limits belong to Zotero's local API rather than to this project.
+        Group permissions are not exposed locally at all, and trashed
+        collections cannot be listed. The
+        [API documentation](https://www.zotero.org/support/dev/web_api/v3/local_api)
+        is the place to check.
+      options:
+        - label: I have considered whether Zotero's local API can support this

@@ -1,0 +1,97 @@
+name: Bug report
+description: Something does not work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This server talks to a Zotero running on your own machine, so the
+        environment usually decides what went wrong. The fields below are what
+        makes a report actionable rather than a guessing game.
+
+        Just have a question? Ask in
+        [Discussions](https://github.com/dvdsosa/zotero-native-mcp/discussions)
+        instead, it gets answered faster.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What went wrong
+      description: One or two sentences. What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce it
+      description: What you asked the assistant to do, or the tool call and its arguments.
+      placeholder: |
+        1. Asked Claude to "file this paper under Thesis and attach the PDF"
+        2. It called zotero_attach_file with filePath "/Users/me/paper.pdf"
+        3. The call returned an error
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: The error, in full
+      description: |
+        Errors from this server carry a remediation hint after the message.
+        Please include it: it usually narrows the cause immediately.
+
+        If a tool failed against Zotero, Zotero's own log often explains why:
+        Help, then Debug Output Logging, then View Output.
+      render: text
+
+  - type: dropdown
+    id: zotero
+    attributes:
+      label: Zotero version
+      description: Zotero, then About Zotero. Writes need 10 or newer.
+      options:
+        - "10.x"
+        - "11 or newer"
+        - "9 or older"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Node and server versions
+      description: Output of `node -v`, and the zotero-native-mcp version you installed.
+      placeholder: "Node v22.23.2, zotero-native-mcp 1.0.1"
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: MCP client
+      placeholder: "Claude Code 2.1, Claude Desktop, Cursor"
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: Zotero was running, with Settings, Advanced, "Allow other applications on this computer to communicate with Zotero" enabled
+          required: true
+        - label: I read the [troubleshooting guide](https://github.com/dvdsosa/zotero-native-mcp/blob/main/docs/how-to/troubleshooting.md) and it did not cover this
+          required: true

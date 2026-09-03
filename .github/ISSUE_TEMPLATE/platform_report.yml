@@ -1,0 +1,53 @@
+name: Platform report
+description: Tell us it worked, or did not, somewhere the README has not verified
+labels: ["platform-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The README lists the exact configurations this has been verified
+        against. Reports from anywhere else are genuinely useful, including the
+        boring "it just worked" ones: that is how the list grows.
+
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Did it work?
+      options:
+        - Worked
+        - Partly worked
+        - Did not work
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and architecture
+      placeholder: "Fedora 41 x86_64, macOS 15 on Intel, Windows 10 22H2"
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Zotero, Node and MCP client
+      placeholder: "Zotero 10.0.1, Node v24.16.0, Claude Desktop"
+    validations:
+      required: true
+
+  - type: textarea
+    id: coverage
+    attributes:
+      label: Coverage output
+      description: |
+        If you ran `node scripts/coverage.mjs`, paste its final summary line:
+        the one reading "N passed, N skipped, N failed, N never called".
+      render: text
+
+  - type: textarea
+    id: problems
+    attributes:
+      label: Anything that broke
+      description: Full error text, if there was any.
+      render: text
