@@ -1,7 +1,8 @@
 # zotero-native-mcp
 
-**An MCP server that reads *and writes* your Zotero library, entirely offline.**
+**An MCP server that reads *and writes* your Zotero 10+ library, entirely offline.**
 
+[![Zotero 10+](https://img.shields.io/badge/Zotero-10%2B-CC2936)](https://www.zotero.org/)
 [![npm](https://img.shields.io/npm/v/zotero-native-mcp)](https://www.npmjs.com/package/zotero-native-mcp)
 [![CI](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -45,11 +46,38 @@ touches the network.
 
 ## Requirements
 
-- **Zotero 10 or newer**, running. Earlier versions have a read-only local API;
-  write tools will not work.
+- **Zotero 10 or newer**, running. This is a hard floor, not a preference:
+  writing through the local API did not exist before Zotero 10. On Zotero 7–9
+  the read tools work and every write fails.
 - Zotero → **Settings → Advanced** → enable
   **"Allow other applications on this computer to communicate with Zotero"**.
 - Node.js 20+.
+
+## Tested on
+
+Everything below is a statement of *evidence*, not of intent. Other platforms
+and clients are expected to work — the server is portable TypeScript talking to
+`127.0.0.1`, with nothing platform-specific by design — but they have not been
+verified, and this table is the honest extent of it.
+
+| | Verified against |
+|---|---|
+| Operating system | macOS 26.6, Apple Silicon |
+| Zotero | 10.0.1 |
+| Node.js | 26.8 |
+| MCP client | Claude Code 2.1 |
+| Library | Personal library ("My Library") |
+
+**Not yet verified.** Windows and Linux with a real Zotero; Intel Macs; Claude
+Desktop, Cursor and other MCP clients; Node 20–25, which `package.json` allows
+but nobody has run; and group libraries — every tool takes a `groupId` and the
+code path is there, but it has never been exercised against an actual group.
+
+CI runs the unit and mock-protocol suites on Linux, so that layer is covered
+there; what is untested on Linux is the conversation with a real Zotero.
+
+If you run it somewhere not on this list, a report either way is welcome — those
+are the most useful issues this project can receive right now.
 
 ## Quick start
 
