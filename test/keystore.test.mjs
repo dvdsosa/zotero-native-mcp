@@ -62,12 +62,14 @@ test('removing an unknown instance is a no-op, not an error', async () => {
   });
 });
 
-test('the store is written 0600, since a key grants write access', async () => {
-  await withStore(async (store, path) => {
-    await store.set('SERVER01', 'secret-key');
-    assert.equal((await stat(path)).mode & 0o777, 0o600);
+// Windows has no POSIX permission bits, so the mode check is meaningless there.
+test('the store is written 0600, since a key grants write access',
+  { skip: process.platform === 'win32' ? 'POSIX permissions only' : false }, async () => {
+    await withStore(async (store, path) => {
+      await store.set('SERVER01', 'secret-key');
+      assert.equal((await stat(path)).mode & 0o777, 0o600);
+    });
   });
-});
 
 test('a corrupt store degrades to empty instead of crashing the server', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'zotero-keystore-test-'));
@@ -98,8 +100,10 @@ test('a store whose shape is wrong is treated as empty', async () => {
 test('the default path lives under the XDG config directory', () => {
   const previous = process.env.XDG_CONFIG_HOME;
   try {
-    process.env.XDG_CONFIG_HOME = '/tmp/xdg-test';
-    assert.equal(defaultKeyStorePath(), '/tmp/xdg-test/zotero-native-mcp/keys.json');
+    const base = join(tmpdir(), 'xdg-test');
+    process.env.XDG_CONFIG_HOME = base;
+    // Built with join() so the separator matches the host platform.
+    assert.equal(defaultKeyStorePath(), join(base, 'zotero-native-mcp', 'keys.json'));
   } finally {
     if (previous === undefined) delete process.env.XDG_CONFIG_HOME;
     else process.env.XDG_CONFIG_HOME = previous;

@@ -313,9 +313,13 @@ Returns `attachmentKey`, `mode`, `filePath`, `contentType`, `bytes`, `uploaded`,
 `attachment`.
 
 - **`linked`** — Zotero records the path. Instant at any size, nothing copied,
-  the file must stay put, and it does not sync to zotero.org.
+  the file must stay put, and it does not sync to zotero.org. **Personal library
+  only**: Zotero rejects linked files in group libraries, because the path would
+  be a broken reference for every other member. Passing `groupId` with
+  `mode: "linked"` is refused before the request is sent.
 - **`imported`** — Zotero copies the file into its storage directory, so the
-  original can move and the attachment syncs. Capped at 4 GB.
+  original can move and the attachment syncs. Capped at 4 GB. This is the only
+  mode a group library accepts.
 
 `uploaded` is `false` for linked files and for imported files Zotero recognised
 as already present. Child attachments cannot belong to collections, so passing

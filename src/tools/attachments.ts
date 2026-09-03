@@ -18,6 +18,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 import { basename, extname, isAbsolute, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -102,7 +103,8 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
       'Attach a file from disk to a Zotero item, or add it as a standalone attachment. mode="linked" ' +
       '(default) records the path only: instant for any file size, but the file must stay put and ' +
       'the attachment does not sync to zotero.org. mode="imported" copies the file into Zotero\'s ' +
-      'storage, so it syncs and survives the original being moved. filePath must be absolute. ' +
+      'storage, so it syncs and survives the original being moved. Group libraries accept only ' +
+      '"imported", since a local path means nothing to other members. filePath must be absolute. ' +
       'Pass parentItemKey to hang the file off an existing reference; omit it for a standalone ' +
       'attachment, optionally filed into collections.',
     inputSchema: {
@@ -136,11 +138,17 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     handler: async ({ filePath, parentItemKey, mode, title, collections, tags, groupId }) => {
-      const info = await describeFile(filePath);
-      const prefix = libraryPrefix(libraryOf({ groupId }));
-      const filename = basename(filePath);
-      const contentType = guessContentType(filePath);
-
+      // A linked file records a path that exists only on this machine, so Zotero
+      // refuses one in a shared library. Catch it here rather than after a round
+      // trip, since `linked` is the default and would otherwise fail by surprise.
+      if (mode === 'linked' && groupId) {
+        throw new ZoteroInputError(
+          'Zotero does not allow linked files in group libraries.',
+          'A linked attachment stores a path that only exists on your machine, so it would be a ' +
+            'broken reference for everyone else in the group. Pass mode: "imported" to copy the ' +
+            'file into the group instead.',
+        );
+      }
       if (parentItemKey && collections?.length) {
         throw new ZoteroInputError(
           'A child attachment cannot belong to collections directly.',
@@ -148,6 +156,11 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
             'drop `parentItemKey` to create a standalone attachment.',
         );
       }
+      const info = await describeFile(filePath);
+      const prefix = libraryPrefix(libraryOf({ groupId }));
+      const filename = basename(filePath);
+      const contentType = guessContentType(filePath);
+
       // Zotero caps stored files at 4 GB; fail before reading a huge file into memory.
       if (mode === 'imported' && info.size > 4 * 1024 * 1024 * 1024) {
         throw new ZoteroInputError(
@@ -237,7 +250,8 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
       if (!url || !uploadKey) {
         throw new ZoteroInputError(
           'Zotero authorized the upload but returned no upload URL.',
-          'Retry the call; if it keeps happening, use mode="linked" as a fallback.',
+          'Retry the call; if it keeps happening, use mode="linked" as a fallback — though only ' +
+            'in your personal library, since group libraries reject linked files.',
         );
       }
 
@@ -300,7 +314,10 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
         const raw = response.data.trim();
         if (!raw) return null;
         try {
-          return raw.startsWith('file://') ? decodeURIComponent(new URL(raw).pathname) : raw;
+          // fileURLToPath, not URL.pathname: on Windows the latter yields
+          // "/C:/Users/..." with a spurious leading slash, and it does not undo
+          // percent-encoding the way a path needs.
+          return raw.startsWith('file://') ? fileURLToPath(raw) : raw;
         } catch {
           return raw;
         }

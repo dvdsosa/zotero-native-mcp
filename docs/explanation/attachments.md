@@ -32,9 +32,10 @@ subject to your storage quota.
 **Disk usage.** Imported means a second copy. A library of a thousand imported
 PDFs is a few gigabytes that also exist in your downloads folder.
 
-**Group libraries.** Linked files are close to useless in a shared library —
-your collaborators do not have your filesystem. Import anything meant to be
-shared.
+**Group libraries.** Zotero does not merely discourage linked files in a shared
+library, it refuses them: your collaborators do not have your filesystem, so the
+path would resolve to nothing for them. Since `linked` is the default, an
+attachment into a group must say `mode: "imported"` explicitly.
 
 ## Choosing
 

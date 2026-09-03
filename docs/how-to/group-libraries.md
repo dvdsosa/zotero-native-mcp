@@ -50,6 +50,18 @@ the target library:
 Note that this creates a *new, independent* item. It does not link the two, and
 attachments are not carried over — attach files separately if you need them.
 
+## Attach a file to a group library
+
+Ask for an **imported** attachment explicitly:
+
+> Attach /Users/me/papers/smith-2024.pdf to that item in the Marine Biology
+> group, imported so the group gets its own copy.
+
+Zotero rejects *linked* files in a group library outright, and `linked` is the
+default — so an attachment into a group that does not name the mode will fail.
+The reason is not arbitrary: a linked attachment stores a path from your
+machine, which resolves to nothing for anyone else in the group.
+
 ## What the local API does not expose for groups
 
 Zotero's local API deliberately reports minimal group metadata: name,

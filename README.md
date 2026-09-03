@@ -64,17 +64,17 @@ verified, and this table is the honest extent of it.
 |---|---|
 | Operating system | macOS 26.6, Apple Silicon |
 | Zotero | 10.0.1 |
-| Node.js | 26.8 |
+| Node.js | 26.8 locally; 20, 22 and 24 in CI |
 | MCP client | Claude Code 2.1 |
-| Library | Personal library ("My Library") |
+| Libraries | Personal **and** group — full read/write cycle in both |
 
-**Not yet verified.** Windows and Linux with a real Zotero; Intel Macs; Claude
-Desktop, Cursor and other MCP clients; Node 20–25, which `package.json` allows
-but nobody has run; and group libraries — every tool takes a `groupId` and the
-code path is there, but it has never been exercised against an actual group.
+CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
+Windows × Node 20, 22 and 24**, so portability of the code itself is covered on
+all three platforms. What no runner can cover is the conversation with a real
+Zotero, since none is installed there.
 
-CI runs the unit and mock-protocol suites on Linux, so that layer is covered
-there; what is untested on Linux is the conversation with a real Zotero.
+**Not yet verified.** A real Zotero on Windows or Linux; Intel Macs; Claude
+Desktop, Cursor and other MCP clients.
 
 If you run it somewhere not on this list, a report either way is welcome — those
 are the most useful issues this project can receive right now.
@@ -171,7 +171,7 @@ npm run inspect     # build, then open the MCP Inspector
 
 ### Tests
 
-`npm test` runs 56 tests on `node:test`, with no test framework to install.
+`npm test` runs 64 tests on `node:test`, with no test framework to install.
 
 | Suite | Covers |
 |---|---|
@@ -179,6 +179,7 @@ npm run inspect     # build, then open the MCP Inspector
 | `test/config.test.mjs` | Environment parsing and defaults |
 | `test/keystore.test.mjs` | Key persistence, `0600` permissions, corrupt stores |
 | `test/client.test.mjs` | The wire protocol, against a mock Zotero |
+| `test/validation.test.mjs` | Argument rejection over stdio; needs no Zotero |
 | `test/integration.test.mjs` | The real server over stdio, against a live Zotero |
 
 `test/helpers/mock-zotero.mjs` reproduces the `Zotero-Server-ID` handshake and
@@ -191,6 +192,7 @@ Two checks need a real Zotero and so are not part of `npm test`:
 ```bash
 node scripts/smoke.mjs read    # read tools end to end
 node scripts/smoke.mjs write   # write path; needs a consent dialog, cleans up after itself
+node scripts/smoke.mjs group   # the same write cycle in a group library
 ```
 
 ### Evaluating tool descriptions
