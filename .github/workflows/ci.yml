@@ -6,16 +6,28 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: ${{ matrix.os }} · Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Report every broken combination, not just the first one to fail.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: ['20', '22', '24']
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
+          cache: npm
+
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
-      # Integration tests skip themselves when no Zotero is reachable, which is
-      # always the case on a CI runner. Unit tests use a mock Zotero instead.
+
+      # The integration suite skips itself when no Zotero answers on
+      # 127.0.0.1:23119, which is the case on every runner. What runs here is
+      # the unit suite plus the protocol tests against the mock Zotero.
       - run: npm test
