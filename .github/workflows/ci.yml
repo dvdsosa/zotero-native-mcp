@@ -16,3 +16,6 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+      # Integration tests skip themselves when no Zotero is reachable, which is
+      # always the case on a CI runner. Unit tests use a mock Zotero instead.
+      - run: npm test

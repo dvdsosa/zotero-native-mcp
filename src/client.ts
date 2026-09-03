@@ -51,6 +51,14 @@ export interface RequestOptions {
   expectText?: boolean;
 }
 
+/** Remaining one-shot recovery attempts for a single logical request. */
+interface RetryBudget {
+  /** Whether a 401 may still trigger re-authorization. */
+  reauthorize: boolean;
+  /** Whether a 412/428 may still trigger a server-ID refresh. */
+  refreshServerId: boolean;
+}
+
 export interface ZoteroResponse<T> {
   status: number;
   data: T;
@@ -82,10 +90,10 @@ export class ZoteroLocalClient {
   // ---------------------------------------------------------------- requests
 
   async request<T = unknown>(options: RequestOptions): Promise<ZoteroResponse<T>> {
-    return this.dispatch<T>(options, true);
+    return this.dispatch<T>(options, { reauthorize: true, refreshServerId: true });
   }
 
-  private async dispatch<T>(options: RequestOptions, mayRetry: boolean): Promise<ZoteroResponse<T>> {
+  private async dispatch<T>(options: RequestOptions, retries: RetryBudget): Promise<ZoteroResponse<T>> {
     const method = options.method ?? 'GET';
     const isWrite = WRITE_METHODS.has(method);
     const headers: Record<string, string> = { ...options.headers };
@@ -146,22 +154,27 @@ export class ZoteroLocalClient {
 
     const errorBody = (await response.text()).trim();
 
+    // Each remedy gets its own budget. A single shared one would let a server-ID
+    // refresh exhaust the retry that re-authorization still needs — exactly the
+    // case when Zotero switches data directories, which invalidates the cached
+    // server ID and the stored key at the same time.
+
     // 401: the key is missing, or a single-use key was consumed by an earlier
     // write. Re-authorize once and replay the request.
-    if (response.status === 401 && mayRetry && this.config.autoAuthorize) {
+    if (response.status === 401 && retries.reauthorize && this.config.autoAuthorize) {
       await this.forgetApiKey();
       await this.authorize();
-      return this.dispatch<T>(options, false);
+      return this.dispatch<T>(options, { ...retries, reauthorize: false });
     }
 
     // 412/428: Zotero restarted or switched data directories, so the cached
     // server ID is stale. Re-resolve and replay once.
-    if ((response.status === 412 || response.status === 428) && mayRetry) {
+    if ((response.status === 412 || response.status === 428) && retries.refreshServerId) {
       this.serverId = null;
       const fresh = await this.getServerId();
       return this.dispatch<T>(
         { ...options, headers: { ...options.headers, 'Zotero-Server-ID': fresh } },
-        false,
+        { ...retries, refreshServerId: false },
       );
     }
 
