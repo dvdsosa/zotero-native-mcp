@@ -3,7 +3,7 @@
   "name": "io.github.dvdsosa/zotero-native-mcp",
   "title": "Zotero Native MCP",
   "description": "Read and write your local Zotero 10 library. No plugin, no zotero.org API key, no cloud.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "url": "https://github.com/dvdsosa/zotero-native-mcp",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "zotero-native-mcp",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "transport": {
         "type": "stdio"
       },

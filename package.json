@@ -1,6 +1,6 @@
 {
   "name": "zotero-native-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for Zotero 10+. Read and write your library entirely offline through Zotero's native local API. No plugin, no API key, no cloud.",
   "license": "MIT",
   "type": "module",
