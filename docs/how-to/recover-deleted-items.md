@@ -34,7 +34,7 @@ which removes the row and deletes attachment files from disk.
 
 Your options are Zotero's, not this server's:
 
-- **Restore from your backup** — the copy of the data directory you made before
+- **Restore from your backup**: the copy of the data directory you made before
   starting. This is the reason for making one.
 - **If you sync with zotero.org**, check the web library at
   [zotero.org/mylibrary](https://www.zotero.org/mylibrary) *before* it syncs

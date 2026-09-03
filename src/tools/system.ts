@@ -124,7 +124,7 @@ export function registerSystemTools(server: McpServer, client: ZoteroLocalClient
           : result.remember
             ? 'Write access granted persistently. The key is stored and will be reused.'
             : 'Write access granted for a single write only. The next write consumes this key and ' +
-              'Zotero will prompt again — ask the user for "Always Allow" to stop that.',
+              'Zotero will prompt again, ask the user for "Always Allow" to stop that.',
       });
     },
   });

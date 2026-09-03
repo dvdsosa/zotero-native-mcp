@@ -7,7 +7,7 @@ project and why it only became possible recently.
 
 Zotero has long shipped a small HTTP server on `127.0.0.1:23119`, used by the
 browser connector. Since Zotero 7 it also serves a local implementation of the
-Zotero Web API v3 under `/api/` — the same routes as `api.zotero.org`, answered
+Zotero Web API v3 under `/api/`: the same routes as `api.zotero.org`, answered
 from your own database.
 
 That local API was **read-only**. `POST`, `PUT`, `PATCH` and `DELETE` were
@@ -21,7 +21,7 @@ of roughly half a second to a second and a half per write, and rate limits. It
 also fails on a plane.
 
 **Option B: ship a Zotero plugin.** Install an `.xpi` that registers extra
-endpoints — `/zotero-write/*` or similar — on Zotero's existing server. Writes
+endpoints, `/zotero-write/*` or similar, on Zotero's existing server. Writes
 then happen in-process through Zotero's own `item.saveTx()`, which is fast and
 correct. The cost is a second piece of software the user must install, that must
 track Zotero's plugin API across releases, and that can break on a Zotero
@@ -49,7 +49,7 @@ any zotero.org credential. See
 header identifying the running instance. Clients cache it and send it back on
 writes. A write without it is refused with `428`; one carrying a stale value is
 refused with `412`. This stops a client from writing into the wrong library
-after the user switches data directories — a real hazard when the address is
+after the user switches data directories, a real hazard when the address is
 always `127.0.0.1`.
 
 ## What this server is, therefore
@@ -58,8 +58,7 @@ A thin, careful client of a capability Zotero already has.
 
 There is no plugin because Zotero itself serves the endpoints. There is no API
 key to configure because the key is issued at runtime and stored locally. There
-is no cloud round trip because nothing ever leaves the loopback interface —
-which is why reads land in 8–60 ms rather than half a second.
+is no cloud round trip because nothing ever leaves the loopback interface, which is why reads land in 8–60 ms rather than half a second.
 
 The server's own work is confined to three things the protocol demands and no
 tool should have to repeat: caching and refreshing the instance ID, obtaining
@@ -77,8 +76,8 @@ you have never synced locally and works with Zotero closed. A plugin-based
 server supports Zotero 7 through 9. Servers built around embeddings offer
 semantic search this one does not attempt.
 
-The bet here is that for the common case — a researcher with Zotero open on
-their own laptop — removing the account, the key, the plugin and the network is
+The bet here is that for the common case, a researcher with Zotero open on
+their own laptop, removing the account, the key, the plugin and the network is
 worth more than the flexibility given up.
 
 ## Further reading

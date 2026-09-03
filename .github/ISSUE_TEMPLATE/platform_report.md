@@ -6,7 +6,7 @@ labels: platform-report
 
 <!-- The README lists the single configuration this has been verified against.
      Reports from anywhere else are genuinely useful, including the boring
-     "it just worked" ones — that is how the list grows. -->
+     "it just worked" ones, that is how the list grows. -->
 
 ## Did it work?
 

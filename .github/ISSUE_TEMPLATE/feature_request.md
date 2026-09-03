@@ -28,5 +28,5 @@ labels: enhancement
 
 <!-- Whether Zotero's local API can actually support this is worth checking:
      https://www.zotero.org/support/dev/web_api/v3/local_api
-     Some limits are the API's rather than this project's — group permissions,
+     Some limits are the API's rather than this project's, group permissions,
      for instance, are not exposed locally at all. -->

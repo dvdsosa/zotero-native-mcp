@@ -1,15 +1,15 @@
 # Tutorial: your first ten minutes
 
 By the end of this lesson you will have connected Zotero to your AI assistant,
-granted it permission to write, and used it to file a real paper — metadata and
-PDF — into a collection you create along the way.
+granted it permission to write, and used it to file a real paper, metadata and
+PDF, into a collection you create along the way.
 
 You need a working Zotero installation and about ten minutes. No prior MCP
 knowledge is assumed.
 
 > [!WARNING]
 > This lesson creates, modifies and deletes real items in your library. Back up
-> your Zotero data directory before starting — see
+> your Zotero data directory before starting, see
 > [Back up your library first](../README.md#back-up-your-library-first).
 > Deleting goes to Zotero's trash and is reversible, but the tools also offer a
 > permanent mode that is not.
@@ -20,7 +20,7 @@ Open Zotero and go to **Zotero → About Zotero** (macOS) or
 **Help → About Zotero** (Windows/Linux).
 
 You need **version 10 or newer**. Earlier versions cannot accept writes from
-this server — the tools that read your library would work, but every attempt to
+this server, the tools that read your library would work, but every attempt to
 create or change anything would fail.
 
 If you are on an older version, update Zotero before continuing.
@@ -84,7 +84,7 @@ It will call `zotero_status` and report something like:
 ```
 
 Two things to notice. `connected: true` means Zotero answered. `writeAccess:
-false` is expected — you have not granted permission yet, and reading never
+false` is expected: you have not granted permission yet, and reading never
 needs it.
 
 If instead you get a connection error, work through
@@ -110,9 +110,9 @@ Now ask for something that changes the library:
 **A dialog appears in Zotero**, naming `zotero-native-mcp` and asking whether to
 allow the change. It offers three buttons:
 
-- **Allow** — grants a *single* write. The next one asks again.
-- **Always Allow** — grants a key that persists.
-- **Deny** — refuses.
+- **Allow**: grants a *single* write. The next one asks again.
+- **Always Allow**: grants a key that persists.
+- **Deny**: refuses.
 
 Choose **Always Allow**. Otherwise you will be interrupted by a dialog on every
 write for the rest of this tutorial.
@@ -134,7 +134,7 @@ Ask for a reference with real metadata:
 > Neural Information Processing Systems.
 
 Your assistant calls `zotero_create_items`. Note that it files the item into the
-collection *as it creates it* — there is no separate "move" step.
+collection *as it creates it*. There is no separate "move" step.
 
 Open Zotero and look at the "MCP Tutorial" collection. The item is there, with
 its creators split into proper author fields.
@@ -145,7 +145,7 @@ Find any PDF on your disk and note its full path. Then:
 
 > Attach /Users/me/Downloads/attention.pdf to that article.
 
-Substitute your own absolute path — a relative path will be rejected, because
+Substitute your own absolute path, a relative path will be rejected, because
 Zotero resolves the path itself and has no idea what directory your assistant
 is working in.
 
@@ -153,8 +153,8 @@ The file is attached in **linked** mode by default: Zotero stores the path and
 copies nothing, so this is instant no matter how large the PDF is. The
 trade-off is that the file must stay where it is.
 
-If you would rather Zotero keep its own copy — so the original can be moved or
-deleted, and the attachment syncs to zotero.org — ask for an imported
+If you would rather Zotero keep its own copy, so the original can be moved or
+deleted, and the attachment syncs to zotero.org, ask for an imported
 attachment instead:
 
 > Attach it again, but imported this time.
@@ -169,8 +169,7 @@ Everything is in place, so put it to work:
 > Give me the BibTeX for that article.
 
 `zotero_export_items` renders it through Zotero's own translators, so the output
-matches what you would get from Zotero's right-click **Export Item** menu —
-same citation keys, same field mapping.
+matches what you would get from Zotero's right-click **Export Item** menu, same citation keys, same field mapping.
 
 Ask for `apa` in the `bib` format instead and you get a formatted bibliography
 entry rather than a BibTeX record.
@@ -189,7 +188,7 @@ this. Try it:
 
 If you also want the article gone, ask for it explicitly. It too goes to the
 trash, and "Show me what is in my Zotero trash" lists what can still be brought
-back. Only `permanent: true` erases for good — an assistant should not use it
+back. Only `permanent: true` erases for good, an assistant should not use it
 unless you ask.
 
 ## What you learned
@@ -200,9 +199,9 @@ create a collection, add a reference, attach a PDF, export a citation.
 
 ## Where to go next
 
-- **[Attach PDFs](how-to/attach-pdfs.md)** — batch-attach a folder of downloads.
-- **[Reference](reference.md)** — the full catalogue of all 28 tools.
-- **[Architecture](explanation/architecture.md)** — why this server needs no
+- **[Attach PDFs](how-to/attach-pdfs.md)**: batch-attach a folder of downloads.
+- **[Reference](reference.md)**: the full catalogue of all 28 tools.
+- **[Architecture](explanation/architecture.md)**: why this server needs no
   plugin and no API key, and what changed in Zotero 10.
 
 ---

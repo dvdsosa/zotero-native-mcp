@@ -38,7 +38,7 @@ Ask for the batch and let the assistant match files to references:
 
 The assistant will search for each title with `zotero_search_items` and call
 `zotero_attach_file` per match. Ask it to report unmatched files rather than
-guessing — a wrong attachment is more annoying to undo than a missing one.
+guessing, a wrong attachment is more annoying to undo than a missing one.
 
 ## Create a reference and attach its PDF in one go
 
@@ -59,7 +59,7 @@ be filed into collections directly:
 > Add /Users/me/Documents/lab-protocol.pdf to my Zotero "Protocols" collection
 > as a standalone attachment.
 
-Child attachments cannot belong to collections — only top-level items can — so
+Child attachments cannot belong to collections, only top-level items can, so
 the server will reject a request that asks for both a parent item and
 collections.
 
@@ -72,8 +72,8 @@ Two routes, in order of preference:
 This uses `zotero_get_item_fulltext`, returning the text **Zotero has already
 indexed**. It is fast and costs no extra file access.
 
-When Zotero has no index for the file — a scanned PDF without OCR, or one added
-seconds ago — fall back to the path:
+When Zotero has no index for the file, a scanned PDF without OCR, or one added
+seconds ago, fall back to the path:
 
 > Get the file path of that attachment and read it directly.
 
@@ -82,18 +82,18 @@ assistant can then open with its own file tools.
 
 ## Troubleshooting
 
-**"filePath must be absolute"** — you passed a relative path. The error message
+**"filePath must be absolute"**: you passed a relative path. The error message
 includes the resolved absolute path it guessed; check it is what you meant.
 
-**"No such file"** — the path is wrong, or the file lives in a cloud-synced
+**"No such file"**: the path is wrong, or the file lives in a cloud-synced
 folder (iCloud Drive, Dropbox) and has not been downloaded locally. Open it once
 in Finder to materialise it.
 
-**"Attachment filename can only be set for stored files"** — you should not see
+**"Attachment filename can only be set for stored files"**: you should not see
 this; it indicates a bug. Please
 [open an issue](https://github.com/dvdsosa/zotero-native-mcp/issues).
 
-**Imported attachment fails above 4 GB** — Zotero does not support stored files
+**Imported attachment fails above 4 GB**: Zotero does not support stored files
 that large. Use linked mode, which has no size limit.
 
 ---

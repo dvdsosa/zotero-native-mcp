@@ -7,7 +7,7 @@ than to undo later.
 ## The two modes
 
 A **linked file** stores a path. Zotero records where the file is and nothing
-else — the bytes stay exactly where you put them.
+else, the bytes stay exactly where you put them.
 
 An **imported file** stores a copy. Zotero takes the file into its own storage
 directory, under a folder named for the attachment key, and from then on that
@@ -18,7 +18,7 @@ copy is the attachment.
 **Speed.** A linked attachment is a database row, so it completes in
 milliseconds whether the file is 20 KB or 2 GB. An imported attachment must
 move the bytes, and this server does so through Zotero's own three-phase upload
-protocol — authorize, transfer, register — which is proportional to file size.
+protocol, authorize, transfer, register, which is proportional to file size.
 
 **Where the file must stay.** A linked attachment breaks if you move or rename
 the file. Zotero keeps a path, not a handle. An imported attachment does not
@@ -49,7 +49,7 @@ a shared drive with its own structure, or anything you are only attaching
 temporarily.
 
 This server defaults to **linked**, on the grounds that it is instant, uses no
-extra disk, and is trivially reversible — you can always import the file
+extra disk, and is trivially reversible: you can always import the file
 afterwards and delete the link. The reverse is more work.
 
 ## What the server does for an imported file
@@ -63,7 +63,7 @@ same:
 1. **Create the attachment item** with `linkMode: imported_file`, a filename and
    a content type.
 2. **Authorize the upload** by posting the file's MD5, size and modification
-   time. Zotero replies with an upload key and a URL — or with `{exists: 1}` if
+   time. Zotero replies with an upload key and a URL, or with `{exists: 1}` if
    a file with that exact MD5 is already in place, in which case there is
    nothing to transfer.
 3. **Transfer the bytes** to that URL. Zotero stages them in a temporary

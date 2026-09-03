@@ -1,6 +1,6 @@
 # Contributing
 
-Never contributed to an open-source project before? That is fine — this page is
+Never contributed to an open-source project before? That is fine. This page is
 written to be followed in order, from cloning the repository to opening a pull
 request.
 
@@ -32,7 +32,7 @@ without going through an assistant.
 
 | Where | What lives there |
 |---|---|
-| `src/tools/` | The tools themselves, one file per area — `items`, `collections`, `attachments`, `discovery`, `system`. Most changes belong here. |
+| `src/tools/` | The tools themselves, one file per area, `items`, `collections`, `attachments`, `discovery`, `system`. Most changes belong here. |
 | `src/client.ts` | Everything about talking to Zotero: the server-ID handshake, API keys, retries, turning HTTP statuses into useful errors. |
 | `src/errors.ts` | The error types and their remediation text. |
 | `src/format.ts` | Trimming Zotero's responses down before they reach the model. |
@@ -49,7 +49,7 @@ matter more here than the linting:
   say what went wrong *and* what the caller should do next. Read a few hints in
   `src/errors.ts` before writing a new one.
 - **A tool's description is its entire interface.** A model never reads the
-  code — only the tool's name, description and schema. Behaviour you do not
+  code, only the tool's name, description and schema. Behaviour you do not
   describe effectively does not exist.
 
 ## 4. Check your work
@@ -62,7 +62,7 @@ npm run build
 npm test
 ```
 
-`npm test` runs 73 tests using `node:test`, which ships with Node — there is no
+`npm test` runs 73 tests using `node:test`, which ships with Node. There is no
 test framework to install. Five of the six suites need no Zotero at all, because
 `test-utils/mock-zotero.mjs` imitates Zotero's local API well enough to
 exercise the real protocol:
@@ -91,7 +91,7 @@ node scripts/coverage.mjs
 It calls all 28 tools and reports which ones ran. It creates its own collection,
 item and attachments and deletes them in a `finally` block, so nothing of yours
 is touched even if the run dies partway. `scripts/smoke.mjs` covers narrower
-slices — see `read`, `write` and `group`.
+slices, see `read`, `write` and `group`.
 
 > [!NOTE]
 > The first write raises Zotero's consent dialog. Choose **"Always Allow"**. A
@@ -131,7 +131,7 @@ ci: run the suite on Linux, macOS and Windows
 Types used here are `feat`, `fix`, `docs`, `ci` and `chore`. Scopes come from
 the source layout: `client`, `auth`, `attachments`, `collections`, `items`.
 
-Keep the summary short and phrase it as an instruction — "refuse", not "refused"
+Keep the summary short and phrase it as an instruction, "refuse", not "refused"
 or "refuses". Then leave a blank line and use the body to explain **why** the
 change was needed. Anyone can read the diff to see what changed; the reasoning
 is the part that is lost otherwise. `git log` shows the tone.
@@ -145,7 +145,7 @@ exactly which.
 
 ---
 
-## Appendix — evaluating tool descriptions
+## Appendix, evaluating tool descriptions
 
 *Maintainers only. This needs a paid API key and a tool that is not part of this
 repository; nothing in a normal contribution requires it.*
@@ -159,7 +159,7 @@ The runner is not in this repository: it is `evaluation.py`, shipped with
 Anthropic's `mcp-builder` skill, which you install separately. Invoke it from a
 checkout of this repository so the relative paths resolve, with
 `ANTHROPIC_BASE_URL` pointed at any endpoint that speaks the Anthropic Messages
-API — [`../.env.example`](../.env.example) lists the variables. The answers in
+API, [`../.env.example`](../.env.example) lists the variables. The answers in
 the XML describe one particular library, so replace them with facts from yours
 before trusting the score.
 

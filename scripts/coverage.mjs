@@ -21,7 +21,7 @@ await client.connect(new StdioClientTransport({ command: 'node', args: ['build/i
 const { tools } = await client.listTools();
 const allNames = tools.map((t) => t.name).sort();
 // name -> {ok, skipped, note, ms}. "skipped" means the library holds nothing to
-// exercise the tool with — absent data, not a defect.
+// exercise the tool with, absent data, not a defect.
 const results = new Map();
 
 /** Calls a tool and records the outcome. `expectError` inverts the pass condition. */
@@ -35,7 +35,7 @@ async function run(name, args = {}, { expectError = false, note = '' } = {}) {
   // A tool called several times passes only if every call behaved.
   results.set(name, { ok: prev ? prev.ok && ok : ok, note: prev?.note || note, ms });
   const text = raw.content?.[0]?.text ?? '';
-  if (!ok) console.log(`  ✖ ${name} — ${text.split('\n')[0].slice(0, 120)}`);
+  if (!ok) console.log(`  ✖ ${name}, ${text.split('\n')[0].slice(0, 120)}`);
   return failed ? null : JSON.parse(text);
 }
 
@@ -67,7 +67,7 @@ if (searches?.searches?.length) {
 } else {
   results.set('zotero_run_saved_search', {
     ok: true, skipped: true,
-    note: 'no saved searches — the API cannot create one, so this needs a library that has some',
+    note: 'no saved searches, the API cannot create one, so this needs a library that has some',
   });
 }
 
@@ -78,8 +78,7 @@ if (parent) await run('zotero_list_collections', { ...lib, scope: 'children', pa
 
 // ── Items, read-only ──────────────────────────────────────────────────────
 // Quicksearch over whatever the library already holds. An empty library is a
-// legitimate state, so nothing below may depend on this returning anything —
-// every tool is exercised again later against objects this script creates.
+// legitimate state, so nothing below may depend on this returning anything, // every tool is exercised again later against objects this script creates.
 await run('zotero_search_items', { ...lib, q: 'a', qmode: 'everything', limit: 5 });
 
 // Full text needs an attachment Zotero has actually indexed; find one.
@@ -97,7 +96,7 @@ if (indexed) {
 } else {
   results.set('zotero_get_item_fulltext', {
     ok: true, skipped: true,
-    note: 'no indexed PDF — Zotero indexes in the background, and a library with no PDFs has none',
+    note: 'no indexed PDF, Zotero indexes in the background, and a library with no PDFs has none',
   });
 }
 
@@ -122,7 +121,7 @@ const items = await run('zotero_create_items', {
   ...lib,
   items: [{
     itemType: 'journalArticle',
-    title: 'Coverage Probe — ñ á 中文 🔬',   // non-ASCII round trip
+    title: 'Coverage Probe, ñ á 中文 🔬',   // non-ASCII round trip
     creators: [{ creatorType: 'author', firstName: 'Ada', lastName: 'Lovelace' },
                { creatorType: 'author', name: 'CERN' }],
     date: '2024-03', publicationTitle: 'Journal of Coverage', DOI: '10.1000/cov',
@@ -135,10 +134,10 @@ if (itemKey) created.items.push(itemKey);
 // update_item: change a field, add a tag, then verify it stuck.
 await run('zotero_update_item', {
   ...lib, itemKey,
-  fields: { title: 'Coverage Probe — updated', extra: 'set by coverage run', tags: [{ tag: '__cov' }, { tag: '__cov-2' }] },
+  fields: { title: 'Coverage Probe, updated', extra: 'set by coverage run', tags: [{ tag: '__cov' }, { tag: '__cov-2' }] },
 });
 const after = await run('zotero_get_item', { ...lib, itemKey });
-const titleOk = after?.item?.title === 'Coverage Probe — updated';
+const titleOk = after?.item?.title === 'Coverage Probe, updated';
 const tagsOk = (after?.item?.tags ?? []).length === 2;
 console.log(`  update_item verified: title=${titleOk} tags=${tagsOk} extra=${after?.item?.extra === 'set by coverage run'}`);
 if (!titleOk || !tagsOk) results.set('zotero_update_item', { ok: false, note: 'change did not persist' });
@@ -222,11 +221,11 @@ await run('zotero_add_items_to_collection', { ...lib, itemKeys: [itemKey], colle
     console.log('\n  Run did not finish; removing what it had created…');
     if (created.items.length) {
       await client.callTool({ name: 'zotero_delete_items', arguments: { ...lib, itemKeys: created.items, permanent: true } })
-        .catch(() => console.log(`  ! could not delete items ${created.items.join(', ')} — remove them by hand`));
+        .catch(() => console.log(`  ! could not delete items ${created.items.join(', ')}, remove them by hand`));
     }
     if (created.collections.length) {
       await client.callTool({ name: 'zotero_delete_collection', arguments: { ...lib, collectionKeys: created.collections, permanent: true } })
-        .catch(() => console.log(`  ! could not delete collections ${created.collections.join(', ')} — remove them by hand`));
+        .catch(() => console.log(`  ! could not delete collections ${created.collections.join(', ')}, remove them by hand`));
     }
   }
 }
@@ -237,7 +236,7 @@ let passed = 0, failed = 0, skipped = 0, missed = 0;
 for (const name of allNames) {
   const r = results.get(name);
   if (!r) { console.log(`  ⚠ ${name.padEnd(38)} never called`); missed++; }
-  else if (r.skipped) { console.log(`  ○ ${name.padEnd(38)} skipped — ${r.note}`); skipped++; }
+  else if (r.skipped) { console.log(`  ○ ${name.padEnd(38)} skipped, ${r.note}`); skipped++; }
   else if (r.ok) { console.log(`  ✔ ${name.padEnd(38)} ${r.note || ''}`); passed++; }
   else { console.log(`  ✖ ${name.padEnd(38)} ${r.note || 'failed'}`); failed++; }
 }

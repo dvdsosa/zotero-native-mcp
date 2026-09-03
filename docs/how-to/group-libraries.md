@@ -48,7 +48,7 @@ the target library:
 > in my personal library under "To Read".
 
 Note that this creates a *new, independent* item. It does not link the two, and
-attachments are not carried over — attach files separately if you need them.
+attachments are not carried over, attach files separately if you need them.
 
 ## Attach a file to a group library
 
@@ -58,7 +58,7 @@ Ask for an **imported** attachment explicitly:
 > group, imported so the group gets its own copy.
 
 Zotero rejects *linked* files in a group library outright, and `linked` is the
-default — so an attachment into a group that does not name the mode will fail.
+default, so an attachment into a group that does not name the mode will fail.
 The reason is not arbitrary: a linked attachment stores a path from your
 machine, which resolves to nothing for anyone else in the group.
 

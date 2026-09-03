@@ -169,7 +169,7 @@ export class ZoteroLocalClient {
     const errorBody = (await response.text()).trim();
 
     // Each remedy gets its own budget. A single shared one would let a server-ID
-    // refresh exhaust the retry that re-authorization still needs — exactly the
+    // refresh exhaust the retry that re-authorization still needs, exactly the
     // case when Zotero switches data directories, which invalidates the cached
     // server ID and the stored key at the same time.
 

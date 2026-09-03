@@ -12,7 +12,7 @@
  * "imported" goes through the Zotero API's three-phase upload protocol:
  * create the attachment item, authorize the upload (md5/filename/filesize/
  * mtime), post the bytes, then register the upload. All three phases stay on
- * loopback — the web API's S3 step is served by Zotero itself here.
+ * loopback, the web API's S3 step is served by Zotero itself here.
  */
 
 import { createHash } from 'node:crypto';
@@ -250,7 +250,7 @@ export function registerAttachmentTools(server: McpServer, client: ZoteroLocalCl
       if (!url || !uploadKey) {
         throw new ZoteroInputError(
           'Zotero authorized the upload but returned no upload URL.',
-          'Retry the call; if it keeps happening, use mode="linked" as a fallback — though only ' +
+          'Retry the call; if it keeps happening, use mode="linked" as a fallback, though only ' +
             'in your personal library, since group libraries reject linked files.',
         );
       }

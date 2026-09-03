@@ -2,8 +2,7 @@
  * Collection management: the structural half of a Zotero library.
  *
  * Creating collections and nesting subcollections is what the Zotero Web API
- * calls a write, and it is exactly what the local API now supports natively —
- * no plugin, no cloud round trip.
+ * calls a write, and it is exactly what the local API now supports natively, * no plugin, no cloud round trip.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -312,7 +311,7 @@ export function registerCollectionTools(server: McpServer, client: ZoteroLocalCl
     description:
       'Bring collections back out of Zotero\'s trash, undoing a non-permanent ' +
       'zotero_delete_collection. You must know the key: Zotero\'s local API cannot list trashed ' +
-      'collections, so there is no way to discover them from here — the user can see them in the ' +
+      'collections, so there is no way to discover them from here, the user can see them in the ' +
       'Zotero window\'s trash. A collection erased permanently cannot be restored at all.',
     inputSchema: {
       collectionKeys: z

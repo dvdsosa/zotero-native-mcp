@@ -7,7 +7,7 @@ on a Zotero plugin, this guide covers the switch.
 
 Confirm you are on **Zotero 10 or newer** (**Zotero → About Zotero**). This
 server cannot work on earlier versions, whereas the server you are leaving
-probably can — so check before removing anything.
+probably can, so check before removing anything.
 
 ## Step 1: Add this server alongside the old one
 
@@ -18,7 +18,7 @@ claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 
 Both servers expose tools named `zotero_*`, so your assistant will see two
-similar sets. That ambiguity is exactly why this overlap should be brief — treat
+similar sets. That ambiguity is exactly why this overlap should be brief, treat
 it as a verification step, not a steady state.
 
 ## Step 2: Verify against your real library
@@ -42,11 +42,11 @@ claude mcp remove <old-server-name>
 
 Then clean up what it needed and this server does not:
 
-- **A zotero.org API key** — if it was created solely for that server, revoke it
+- **A zotero.org API key**: if it was created solely for that server, revoke it
   at [zotero.org/settings/keys](https://www.zotero.org/settings/keys).
-- **Environment variables** — `ZOTERO_API_KEY`, `ZOTERO_LIBRARY_ID`,
+- **Environment variables**: `ZOTERO_API_KEY`, `ZOTERO_LIBRARY_ID`,
   `ZOTERO_LOCAL` and similar are no longer read by anything.
-- **A companion Zotero plugin** — if the old server required an `.xpi` write
+- **A companion Zotero plugin**: if the old server required an `.xpi` write
   endpoint, uninstall it from **Tools → Add-ons**. Leaving it installed keeps an
   unnecessary HTTP endpoint open inside Zotero.
 
@@ -75,7 +75,7 @@ are leaving:
 - **Working while Zotero is closed.** A web API server does not care. This one
   needs the application running.
 
-If any of those matter, keeping both servers registered is legitimate — just
+If any of those matter, keeping both servers registered is legitimate, just
 name them distinctly so your assistant can tell them apart.
 
 ---

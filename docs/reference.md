@@ -32,7 +32,7 @@ object changed since you read it.
 
 **Annotations.** Each tool below is marked *read-only*, *write*, or
 *destructive*, matching the MCP annotations the server advertises. The
-*destructive* ones can erase data irreversibly — back up your library before
+*destructive* ones can erase data irreversibly, back up your library before
 using them, as described in
 [Back up your library first](../README.md#back-up-your-library-first).
 
@@ -69,7 +69,7 @@ No parameters.
 Returns `authorized`, `persistent`, `message`.
 
 `persistent: true` means the user chose **Always Allow** and the key is stored.
-`false` means **Allow** — the key is consumed by the next write, and a new
+`false` means **Allow**: the key is consumed by the next write, and a new
 dialog will follow. Write tools re-authorize on their own when they meet a
 `401`, so calling this directly is only needed to grant access deliberately up
 front. See [How authorization works](explanation/authorization.md).
@@ -81,7 +81,7 @@ Lists the personal library and every group library available locally.
 No parameters.
 
 Returns `personalLibrary` and `groups`. Each group carries `groupId`, `name`,
-`description` and `numItems` — Zotero's local API exposes no permission or
+`description` and `numItems`: Zotero's local API exposes no permission or
 ownership data.
 
 ### `zotero_get_item_type_fields` · read-only
@@ -107,7 +107,7 @@ outright if it carries a field the type does not define.
 | Parameter | Type | Default | Notes |
 |---|---|---|---|
 | `scope` | `all` \| `top` \| `children` | `all` | `all` returns every collection flat, each with its `parentCollection`, so the whole tree is reconstructible in one call. |
-| `parentKey` | key | — | Required when `scope` is `children`. |
+| `parentKey` | key |, | Required when `scope` is `children`. |
 | `groupId`, `limit`, `start`, `verbose` | | | |
 
 Returns paging fields plus `collections`.
@@ -157,7 +157,7 @@ Returns `updated`, `collectionKey`, `libraryVersion`. At least one of `name` or
 
 Returns `permanent`, `trashed`, `erased`, `notFound`, `libraryVersion`.
 
-Items inside are **never** deleted either way — they stay in the library and in
+Items inside are **never** deleted either way. They stay in the library and in
 any other collection they belong to. Subcollections follow their parent.
 
 Record the keys when trashing: the local API cannot list trashed collections, so
@@ -173,7 +173,7 @@ a key is the only way to find one again from here.
 Returns `restored`, `notFound`.
 
 Undoes a non-permanent `zotero_delete_collection`. You must already know the
-key — trashed collections cannot be discovered through the local API, though the
+key, trashed collections cannot be discovered through the local API, though the
 user can see them in Zotero's own trash.
 
 ---
@@ -184,14 +184,14 @@ user can see them in Zotero's own trash.
 
 | Parameter | Type | Default | Notes |
 |---|---|---|---|
-| `q` | string | — | Quicksearch text. Omit to browse. |
+| `q` | string |, | Quicksearch text. Omit to browse. |
 | `qmode` | `titleCreatorYear` \| `everything` | `titleCreatorYear` | `everything` also searches attachment full text and notes; slower. |
-| `itemType` | string | — | Zotero syntax: `book`, `book \|\| journalArticle`, `-attachment`. |
-| `tag` | string | — | Same syntax: `tag1 \|\| tag2`, leading `-` excludes. |
-| `collectionKey` | key | — | Restrict to one collection. |
+| `itemType` | string |, | Zotero syntax: `book`, `book \|\| journalArticle`, `-attachment`. |
+| `tag` | string |, | Same syntax: `tag1 \|\| tag2`, leading `-` excludes. |
+| `collectionKey` | key |, | Restrict to one collection. |
 | `topLevelOnly` | boolean | `true` | `false` includes child notes and attachments. |
 | `includeTrashed` | boolean | `false` | |
-| `since` | integer | — | Only objects modified after this library version. |
+| `since` | integer |, | Only objects modified after this library version. |
 | `sort` | enum | `dateModified` | `dateAdded`, `dateModified`, `title`, `creator`, `itemType`, `date`, `publisher`, `publicationTitle`. |
 | `direction` | `asc` \| `desc` | `desc` | |
 | `groupId`, `limit`, `start`, `verbose` | | | |
@@ -216,7 +216,7 @@ quickest way to find the attachment key needed to read a PDF.
 | `itemKey` | key | **Required.** |
 | `groupId`, `limit`, `start`, `verbose` | | |
 
-Returns paging fields plus `children` — notes, attachments and annotations.
+Returns paging fields plus `children`: notes, attachments and annotations.
 
 ### `zotero_create_items` · write
 
@@ -231,7 +231,7 @@ Documented fields: `title`, `creators`, `tags`, `collections`, `parentItem`.
 - `creators`: `{ creatorType, firstName, lastName }` or `{ creatorType, name }`
   for institutions.
 - `tags`: `{ tag, type? }`; `type: 1` marks an automatic tag.
-- `collections`: array of collection keys — files the item at creation time,
+- `collections`: array of collection keys, files the item at creation time,
   which is cheaper than creating then moving.
 - `parentItem`: for notes and attachments.
 
@@ -347,7 +347,7 @@ Returns `attachmentKey`, `content`, `truncated`, `totalCharacters`,
 `indexedPages`, `totalPages`.
 
 Text comes from Zotero's index, so it exists only for attachments Zotero has
-indexed — a scanned PDF without OCR has none. Fall back to
+indexed, a scanned PDF without OCR has none. Fall back to
 `zotero_get_attachment_path`.
 
 ### `zotero_export_items` · read-only
@@ -375,22 +375,22 @@ form and are reported in `skippedKeys` rather than silently dropped.
 | Parameter | Type | Default | Notes |
 |---|---|---|---|
 | `filePath` | string | | **Required. Must be absolute.** |
-| `parentItemKey` | key | — | Omit for a standalone attachment. |
+| `parentItemKey` | key |, | Omit for a standalone attachment. |
 | `mode` | `linked` \| `imported` | `linked` | See below. |
 | `title` | string | file name | |
-| `collections` | array | — | Standalone attachments only. |
-| `tags` | array of strings | — | |
+| `collections` | array |, | Standalone attachments only. |
+| `tags` | array of strings |, | |
 | `groupId` | integer | | |
 
 Returns `attachmentKey`, `mode`, `filePath`, `contentType`, `bytes`, `uploaded`,
 `attachment`.
 
-- **`linked`** — Zotero records the path. Instant at any size, nothing copied,
+- **`linked`**: Zotero records the path. Instant at any size, nothing copied,
   the file must stay put, and it does not sync to zotero.org. **Personal library
   only**: Zotero rejects linked files in group libraries, because the path would
   be a broken reference for every other member. Passing `groupId` with
   `mode: "linked"` is refused before the request is sent.
-- **`imported`** — Zotero copies the file into its storage directory, so the
+- **`imported`**: Zotero copies the file into its storage directory, so the
   original can move and the attachment syncs. Capped at 4 GB. This is the only
   mode a group library accepts.
 
@@ -420,9 +420,9 @@ Works for both linked and imported attachments. `path` is `null` for
 
 | Parameter | Type | Default | Notes |
 |---|---|---|---|
-| `q` | string | — | Filter by text. |
+| `q` | string |, | Filter by text. |
 | `qmode` | `contains` \| `startsWith` | `contains` | Ignored without `q`. |
-| `collectionKey` | key | — | Only tags used within this collection. |
+| `collectionKey` | key |, | Only tags used within this collection. |
 | `groupId`, `limit`, `start` | | | |
 
 Returns paging fields plus `tags`, each with `tag`, `automatic` and `numItems`.
@@ -457,7 +457,7 @@ All optional. A stock Zotero install needs none.
 | `ZOTERO_LOCAL_BASE_URL` | `http://127.0.0.1:<port>` | Full base URL override. |
 | `ZOTERO_LOCAL_APP_NAME` | `zotero-native-mcp` | Name shown in the consent dialog. |
 | `ZOTERO_LOCAL_AUTO_AUTHORIZE` | `true` | `false` requires explicit `zotero_authorize`. |
-| `ZOTERO_LOCAL_API_KEY` | — | Pre-provisioned key, bypassing the key store. |
+| `ZOTERO_LOCAL_API_KEY` |, | Pre-provisioned key, bypassing the key store. |
 | `ZOTERO_LOCAL_KEY_STORE` | `~/.config/zotero-native-mcp/keys.json` | Key store path. |
 | `ZOTERO_LOCAL_TIMEOUT_MS` | `60000` | Per-request timeout. |
 
@@ -470,7 +470,7 @@ Errors carry a remediation hint alongside the message.
 | `400` | Zotero rejected the body or parameters | Check field names against `zotero_get_item_type_fields`. |
 | `401` | No valid local API key | `zotero_authorize`; choose **Always Allow**. |
 | `403` | Local API disabled, or read-only library | Enable the setting, or check group permissions. |
-| `404` | Key not found **in this library** | Verify `groupId` — keys are library-scoped. |
+| `404` | Key not found **in this library** | Verify `groupId`: keys are library-scoped. |
 | `409` | Zotero busy (sync or transaction) | Retry in a few seconds. |
 | `412` | Version conflict, or instance mismatch | Re-read the object and resend with the current version. |
 | `413` | Batch too large | Split into chunks of 50. |
@@ -486,7 +486,7 @@ Properties of Zotero's local API, not of this server:
 - `zotero_export_items`: 100 keys per call.
 - Imported attachments: **4 GB** maximum.
 - Authorization prompts: 5 per minute.
-- Group metadata is minimal — no permissions or ownership.
+- Group metadata is minimal, no permissions or ownership.
 - Full text covers only what Zotero has indexed.
 - Atom output is unsupported; quicksearch ranking may differ slightly from the
   web API's.

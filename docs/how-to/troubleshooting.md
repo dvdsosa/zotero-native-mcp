@@ -12,7 +12,7 @@ was never loaded, and Zotero is not involved.
 
 **Registered in one directory only.** `claude mcp add` defaults to the *local*
 scope, which stores the server against the exact folder you ran it in. Open a
-different project — the repository itself rather than its parent, say — and the
+different project, the repository itself rather than its parent, say, and the
 tools are gone. Check with `claude mcp list`, then re-register for every project:
 
 ```bash
@@ -71,8 +71,7 @@ library where you only have read access. Check your role at
 
 ## Everything fails with 412 after restarting Zotero
 
-`412 Precondition Failed` means the cached instance identity no longer matches —
-normally because Zotero restarted with a different data directory. The server
+`412 Precondition Failed` means the cached instance identity no longer matches, normally because Zotero restarted with a different data directory. The server
 detects this and retries once on its own, so a persistent 412 suggests something
 stranger. Restart your MCP client to clear all cached state.
 
@@ -91,7 +90,7 @@ rm ~/.config/zotero-native-mcp/keys.json
 Almost always a library mismatch rather than a bad key. Item and collection keys
 are scoped to one library, so a key found in a group will 404 against your
 personal library and vice versa. Confirm which library the object lives in and
-pass `groupId` accordingly — see
+pass `groupId` accordingly, see
 [Group libraries](group-libraries.md).
 
 ## "No indexed full text found"
@@ -106,7 +105,7 @@ from disk directly.
 ## Rate-limited: "Too many authorization requests"
 
 Zotero allows five authorization prompts per minute. Hitting the limit almost
-always means a loop of single-use keys — approve with **Always Allow** and it
+always means a loop of single-use keys, approve with **Always Allow** and it
 stops. Wait for the interval named in the error before retrying.
 
 ## A batch operation rejects more than 50 items
@@ -119,14 +118,13 @@ assistant to work in chunks:
 ## Zotero freezes during a large import
 
 Imported attachments are copied through Zotero's own transaction machinery, so a
-very large file briefly occupies it. Prefer **linked** mode for large files —
-it stores only a path and returns immediately. See
+very large file briefly occupies it. Prefer **linked** mode for large files: it
+stores only a path and returns immediately. See
 [Linked vs imported attachments](../explanation/attachments.md).
 
 ## Still stuck
 
-Turn on Zotero's own logging — **Help → Debug Output Logging → View Output** —
-and reproduce the problem. It shows the requests Zotero received and why it
+Turn on Zotero's own logging, **Help → Debug Output Logging → View Output**: and reproduce the problem. It shows the requests Zotero received and why it
 rejected them. Include that output when
 [opening an issue](https://github.com/dvdsosa/zotero-native-mcp/issues).
 

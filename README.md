@@ -26,7 +26,7 @@ Claude:  ✓ created collection "Methods" under "Thesis"
 ## Why this exists
 
 Zotero 10 added **write support to its built-in local API**. Before that, every
-Zotero MCP server had to work around a read-only local endpoint — either by
+Zotero MCP server had to work around a read-only local endpoint, either by
 routing writes through `api.zotero.org` (slow, needs an API key, needs your
 library synced to the cloud) or by shipping a separate Zotero plugin you had to
 install and keep up to date.
@@ -56,17 +56,17 @@ touches the network.
 ## Tested on
 
 Everything below is a statement of *evidence*, not of intent. Other platforms
-and clients are expected to work — the server is portable TypeScript talking to
-`127.0.0.1`, with nothing platform-specific by design — but they have not been
+and clients are expected to work. The server is portable TypeScript talking to
+`127.0.0.1`, with nothing platform-specific by design. But they have not been
 verified, and this table is the honest extent of it.
 
 | Component | Verified against |
 |---|---|
-| Operating system | **macOS 26.6** (Apple Silicon), **Windows 11 Pro** build 26200 (x64) and **Ubuntu 24.04 LTS** (x86_64) — all three against a real Zotero |
+| Operating system | **macOS 26.6** (Apple Silicon), **Windows 11 Pro** build 26200 (x64) and **Ubuntu 24.04 LTS** (x86_64), all three against a real Zotero |
 | Zotero | 10.0.1 |
 | Node.js | 26.8, 22.23 and 24.16 respectively; 22, 24 and 26 in CI |
 | MCP client | Claude Code 2.1, on macOS and Windows |
-| Libraries | Personal **and** group — all 28 tools exercised in both |
+| Libraries | Personal **and** group, all 28 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
 Windows × Node 22, 24 and 26**, so portability of the code itself is covered on
@@ -78,7 +78,7 @@ against a live library.
 **Not yet verified.** Intel Macs; Claude Code on Linux, where only the scripts
 were run; Claude Desktop, Cursor and other MCP clients anywhere.
 
-If you run it somewhere not on this list, a report either way is welcome — those
+If you run it somewhere not on this list, a report either way is welcome, those
 are the most useful issues this project can receive right now.
 
 ## Back up your library first
@@ -91,14 +91,14 @@ are the most useful issues this project can receive right now.
 > `zotero_delete_collection` move things to **Zotero's trash**, where you can
 > restore them from the Zotero window or with `zotero_restore_items`. But Zotero
 > empties that trash automatically after 30 days, and both tools take a
-> `permanent: true` that erases outright — no undo, attachment files removed from
+> `permanent: true` that erases outright, no undo, attachment files removed from
 > disk, nothing in the API able to bring them back. `zotero_empty_trash` does the
 > same to everything already in the trash.
 >
 > These tools are driven by an assistant interpreting instructions in natural
 > language, which can misread which item you meant.
 >
-> **To back up:** quit Zotero, then copy your whole data directory — `~/Zotero`
+> **To back up:** quit Zotero, then copy your whole data directory, `~/Zotero`
 > on macOS and Linux, `%USERPROFILE%\Zotero` on Windows, or whatever
 > **Settings → Advanced → Files and Folders** reports. It holds `zotero.sqlite`
 > and the `storage` folder with every attachment. Zotero's own guidance is at
@@ -132,7 +132,7 @@ claude mcp add --scope user zotero-native-mcp -- npx -y zotero-native-mcp
 
 `--scope user` registers it for every project. Without it, `claude mcp add`
 defaults to the *local* scope, which ties the server to the one directory you
-ran the command in — open anything else and the tools are simply absent.
+ran the command in, open anything else and the tools are simply absent.
 
 No environment variables are needed. Start a new session, then ask your
 assistant to run `zotero_status` to confirm the connection.
@@ -152,20 +152,20 @@ it. Choose **"Always Allow"** so you are not asked again.
 
 ## Tools at a glance
 
-**Collections** — `list_collections` `get_collection` `create_collection`
+**Collections**: `list_collections` `get_collection` `create_collection`
 `update_collection` `delete_collection` `restore_collection`
 
-**Items** — `search_items` `get_item` `get_item_children` `create_items`
+**Items**: `search_items` `get_item` `get_item_children` `create_items`
 `update_item` `delete_items` `restore_items` `add_items_to_collection`
 `remove_items_from_collection` `get_item_fulltext` `export_items`
 
-**Trash** — `list_trash` `empty_trash` (and the `restore_*` tools above)
+**Trash**: `list_trash` `empty_trash` (and the `restore_*` tools above)
 
-**Attachments** — `attach_file` `get_attachment_path`
+**Attachments**: `attach_file` `get_attachment_path`
 
-**Discovery** — `list_tags` `list_saved_searches` `run_saved_search`
+**Discovery**: `list_tags` `list_saved_searches` `run_saved_search`
 
-**System** — `status` `authorize` `list_libraries` `get_item_type_fields`
+**System**: `status` `authorize` `list_libraries` `get_item_type_fields`
 
 All names are prefixed `zotero_`. See the **[reference](docs/reference.md)** for
 full signatures.
@@ -176,19 +176,19 @@ This project is not a fork. It was written from scratch once Zotero 10 made
 native local writes possible, but it stands on the shoulders of earlier work
 that solved the same problem under tighter constraints:
 
-- **[54yyyu/zotero-mcp](https://github.com/54yyyu/zotero-mcp)** — the most
+- **[54yyyu/zotero-mcp](https://github.com/54yyyu/zotero-mcp)**: the most
   widely used Zotero MCP server. Rich feature set including semantic search;
   writes go through `api.zotero.org`.
-- **[cookjohn/zotero-mcp](https://github.com/cookjohn/zotero-mcp)** — a Zotero 7
+- **[cookjohn/zotero-mcp](https://github.com/cookjohn/zotero-mcp)**: a Zotero 7
   plugin exposing an MCP endpoint from inside Zotero, with vector search.
 - **[Ayanya-0628/zotero-mcp](https://github.com/Ayanya-0628/zotero-mcp)** and
-  **[dzackgarza/zotero-local-write-api](https://github.com/dzackgarza/zotero-local-write-api)**
-  — local-first writes via a companion `.xpi` write endpoint.
-- **[kujenga/zotero-mcp](https://github.com/kujenga/zotero-mcp)** — a lightweight
+  **[dzackgarza/zotero-local-write-api](https://github.com/dzackgarza/zotero-local-write-api)**: local-first writes via a companion `.xpi` write endpoint.
+- **[kujenga/zotero-mcp](https://github.com/kujenga/zotero-mcp)**: a lightweight
   Python server for the Zotero API.
 
 If you need Zotero 7/8/9 support, semantic or vector search, or writes to a
-library you only have cloud access to, those projects remain the right choice.
+library you only have cloud access to, then those projects remain the right
+choice.
 
 ## Contributing
 
