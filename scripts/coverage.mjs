@@ -179,7 +179,22 @@ if (groupId) {
 }
 const imported = await run('zotero_attach_file', { ...lib, filePath: pdfPath, parentItemKey: itemKey, mode: 'imported', title: 'Imported PDF' });
 console.log(`  imported PDF: contentType=${imported?.contentType} uploaded=${imported?.uploaded} bytes=${imported?.bytes}`);
-await run('zotero_get_attachment_path', { ...lib, itemKey });
+// The resolved path is the most platform-sensitive value this server produces:
+// Zotero hands back a file:// URL, and converting it wrongly yields "/C:/Users/…"
+// on Windows. Print it, and fail loudly on that exact shape.
+const paths = await run('zotero_get_attachment_path', { ...lib, itemKey });
+for (const a of paths?.attachments ?? []) {
+  if (!a.path) continue;
+  console.log(`  attachment path: ${a.path}`);
+  const looksMangled = /^\/[A-Za-z]:/.test(a.path);
+  const absolute = process.platform === 'win32' ? /^[A-Za-z]:\\/.test(a.path) : a.path.startsWith('/');
+  if (looksMangled || !absolute) {
+    results.set('zotero_get_attachment_path', {
+      ok: false,
+      note: `path is not a valid ${process.platform} absolute path: ${a.path}`,
+    });
+  }
+}
 
 // Reads against objects this run created, so coverage does not depend on the
 // library already holding anything. An empty Zotero still reaches every tool.
