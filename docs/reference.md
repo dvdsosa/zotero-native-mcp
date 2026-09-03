@@ -32,9 +32,16 @@ object changed since you read it.
 
 **Annotations.** Each tool below is marked *read-only*, *write*, or
 *destructive*, matching the MCP annotations the server advertises. The
-*destructive* ones bypass Zotero's trash and cannot be undone — back up your
-library before using them, as described in
+*destructive* ones can erase data irreversibly — back up your library before
+using them, as described in
 [Back up your library first](../README.md#back-up-your-library-first).
+
+**The trash.** Deleting is reversible unless you ask otherwise.
+`zotero_delete_items` and `zotero_delete_collection` move objects to Zotero's
+trash by default, and `zotero_restore_items` / `zotero_restore_collection` bring
+them back. Passing `permanent: true` erases instead, which nothing can undo.
+Zotero purges its own trash after 30 days by default, so "reversible" means
+reversible for about a month.
 
 ---
 
@@ -142,16 +149,32 @@ Returns `updated`, `collectionKey`, `libraryVersion`. At least one of `name` or
 
 ### `zotero_delete_collection` · write, **destructive**
 
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `collectionKeys` | array | | **Required.** Up to 50 keys. |
+| `permanent` | boolean | `false` | `false` moves them to the trash; `true` erases them. |
+| `groupId` | integer | | |
+
+Returns `permanent`, `trashed`, `erased`, `notFound`, `libraryVersion`.
+
+Items inside are **never** deleted either way — they stay in the library and in
+any other collection they belong to. Subcollections follow their parent.
+
+Record the keys when trashing: the local API cannot list trashed collections, so
+a key is the only way to find one again from here.
+
+### `zotero_restore_collection` · write, idempotent
+
 | Parameter | Type | Notes |
 |---|---|---|
 | `collectionKeys` | array | **Required.** Up to 50 keys. |
 | `groupId` | integer | |
 
-Returns `deleted`, `libraryVersion`.
+Returns `restored`, `notFound`.
 
-Items inside are **not** deleted — they stay in the library and in any other
-collection they belong to. Subcollections *are* deleted along with their parent.
-Not reversible through the API.
+Undoes a non-permanent `zotero_delete_collection`. You must already know the
+key — trashed collections cannot be discovered through the local API, though the
+user can see them in Zotero's own trash.
 
 ---
 
@@ -232,19 +255,66 @@ Array fields are **replaced wholesale**. To change collection membership prefer
 `zotero_add_items_to_collection` / `zotero_remove_items_from_collection`, which
 merge rather than overwrite.
 
-To move an item to the trash (recoverable), pass `{"deleted": true}`.
+`zotero_delete_items` is the better way to trash an item; this works too, via
+`{"deleted": true}`.
 
 ### `zotero_delete_items` · write, **destructive**
+
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `itemKeys` | array | | **Required.** Up to 50 keys. |
+| `permanent` | boolean | `false` | `false` moves the items to the trash; `true` erases them. |
+| `groupId` | integer | | |
+
+Returns `permanent`, `trashed`, `erased`, `alreadyInTrash`, `notFound`,
+`libraryVersion`.
+
+With the default, items go to Zotero's trash: they vanish from normal views but
+keep their children and files, and `zotero_restore_items` brings them back.
+Zotero purges the trash after 30 days by default.
+
+With `permanent: true` the items are erased outright. Child notes and
+attachments go with them, stored attachment files are deleted from disk, and
+nothing can undo it. Only pass it when the user has asked for exactly that.
+
+### `zotero_restore_items` · write, idempotent
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `itemKeys` | array | **Required.** Up to 50 keys. |
 | `groupId` | integer | |
 
-Returns `deleted`, `libraryVersion`.
+Returns `restored`, `wereNotInTrash`, `notFound`.
 
-Permanent — this **bypasses the trash**. Child notes and attachments go with the
-item, and stored attachment files are removed from disk. Not reversible.
+Takes items back out of the trash, returning them to their collections. Works
+only while they are still there: an item erased permanently, or purged by
+Zotero's 30-day retention, is unrecoverable.
+
+### `zotero_list_trash` · read-only
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `groupId`, `limit`, `start`, `verbose` | | |
+
+Returns paging fields plus `items`.
+
+Lists what `zotero_restore_items` can bring back. Trashed **collections** do not
+appear: Zotero's local API has no endpoint to enumerate them, so a trashed
+collection can only be restored by key or from the Zotero window.
+
+### `zotero_empty_trash` · write, **destructive**
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `expectedCount` | integer | **Required.** How many items you expect to erase. |
+| `groupId` | integer | |
+
+Returns `erased`, `libraryVersion`.
+
+Permanently erases everything in the trash. `expectedCount` is an interlock: it
+must equal the trash's actual size, so call `zotero_list_trash` first and pass
+its `totalResults`. A mismatch aborts the call and deletes nothing, which is what
+stops this from ever running on a trash nobody has looked at.
 
 ### `zotero_add_items_to_collection` · write, idempotent
 

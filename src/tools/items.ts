@@ -150,6 +150,46 @@ async function editCollectionMembership(
   return { changed, unchanged };
 }
 
+/**
+ * Sets or clears the trash flag on a set of items.
+ *
+ * Zotero's trash is an ordinary field: `deleted: true` hides the object from
+ * normal views but keeps it, its children and its files intact and restorable.
+ * Each item is patched individually so a single bad key cannot take the batch
+ * down with it.
+ */
+async function setTrashed(
+  client: ZoteroLocalClient,
+  prefix: string,
+  itemKeys: string[],
+  deleted: boolean,
+): Promise<{ changed: string[]; alreadyThere: string[]; missing: string[] }> {
+  const changed: string[] = [];
+  const alreadyThere: string[] = [];
+  const missing: string[] = [];
+
+  await mapLimited(itemKeys, 5, async (key) => {
+    let current: ZoteroEnvelope;
+    try {
+      const response = await client.request<ZoteroEnvelope>({ path: `${prefix}/items/${key}` });
+      current = response.data;
+    } catch (error) {
+      if (error instanceof ZoteroHttpError && error.status === 404) { missing.push(key); return; }
+      throw error;
+    }
+    const data = (current.data ?? {}) as { deleted?: boolean };
+    if (Boolean(data.deleted) === deleted) { alreadyThere.push(key); return; }
+    await client.request<unknown>({
+      method: 'PATCH',
+      path: `${prefix}/items/${key}`,
+      body: { version: current.version ?? 0, deleted },
+    });
+    changed.push(key);
+  });
+
+  return { changed, alreadyThere, missing };
+}
+
 export function registerItemTools(server: McpServer, client: ZoteroLocalClient): void {
   defineTool(server, {
     name: 'zotero_search_items',
@@ -365,18 +405,55 @@ export function registerItemTools(server: McpServer, client: ZoteroLocalClient):
     name: 'zotero_delete_items',
     title: 'Delete items',
     description:
-      'Permanently delete up to 50 items, bypassing the trash. Child notes and attachments of a ' +
-      'deleted item go with it, and stored attachment files are removed from disk. This cannot be ' +
-      'undone through the API, so confirm with the user before calling it. To move items to the ' +
-      'trash instead (recoverable), use zotero_update_item with {"deleted": true}.',
+      'Move up to 50 items to Zotero\'s trash, where the user can restore them from the Zotero ' +
+      'window or with zotero_restore_items. This is the default and it is reversible. Trashed ' +
+      'items keep their attachments and files; Zotero empties the trash automatically after 30 ' +
+      'days by default. Pass permanent: true only when the user has explicitly asked for an ' +
+      'irreversible delete: that erases the items outright, takes their child notes and ' +
+      'attachments with them, removes attachment files from disk, and cannot be undone by anything.',
     inputSchema: {
-      itemKeys: z.array(objectKey).min(1).max(50).describe('Keys of the items to delete, at most 50 per call.'),
+      itemKeys: z.array(objectKey).min(1).max(50).describe('Keys of the items to remove, at most 50 per call.'),
+      permanent: z
+        .boolean()
+        .default(false)
+        .describe(
+          'false (default) moves the items to the trash, which is reversible. true erases them ' +
+            'immediately and irreversibly, deleting attachment files from disk. Only pass true on ' +
+            'an explicit request from the user.',
+        ),
       groupId: groupIdParam,
     },
-    outputSchema: { deleted: z.array(z.string()), libraryVersion: z.number().nullable() },
+    outputSchema: {
+      permanent: z.boolean(),
+      trashed: z.array(z.string()).describe('Items moved to the trash. Empty when permanent is true.'),
+      erased: z.array(z.string()).describe('Items erased irreversibly. Empty when permanent is false.'),
+      alreadyInTrash: z.array(z.string()),
+      notFound: z.array(z.string()),
+      libraryVersion: z.number().nullable(),
+    },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
-    handler: async ({ itemKeys, groupId }) => {
+    handler: async ({ itemKeys, permanent, groupId }) => {
       const prefix = libraryPrefix(libraryOf({ groupId }));
+
+      if (!permanent) {
+        const result = await setTrashed(client, prefix, itemKeys, true);
+        if (result.missing.length && !result.changed.length && !result.alreadyThere.length) {
+          throw new ZoteroInputError(
+            `Item(s) not found in this library: ${result.missing.join(', ')}.`,
+            'Verify the keys with zotero_search_items, and check whether they live in a group ' +
+              'library (pass groupId) rather than the personal library.',
+          );
+        }
+        return ok({
+          permanent: false,
+          trashed: result.changed,
+          erased: [],
+          alreadyInTrash: result.alreadyThere,
+          notFound: result.missing,
+          libraryVersion: null,
+        });
+      }
+
       const version = await libraryVersion(client, prefix);
       const response = await client.request<unknown>({
         method: 'DELETE',
@@ -384,7 +461,135 @@ export function registerItemTools(server: McpServer, client: ZoteroLocalClient):
         query: { itemKey: itemKeys.join(',') },
         headers: { 'If-Unmodified-Since-Version': String(version) },
       });
-      return ok({ deleted: itemKeys, libraryVersion: response.version });
+      return ok({
+        permanent: true,
+        trashed: [],
+        erased: itemKeys,
+        alreadyInTrash: [],
+        notFound: [],
+        libraryVersion: response.version,
+      });
+    },
+  });
+
+  defineTool(server, {
+    name: 'zotero_restore_items',
+    title: 'Restore items from the trash',
+    description:
+      'Bring items back out of Zotero\'s trash, undoing a non-permanent zotero_delete_items. The ' +
+      'items return to the collections they were in. Only works while they are still in the trash: ' +
+      'nothing can recover an item that was erased permanently or that Zotero has already purged ' +
+      'after its 30-day retention.',
+    inputSchema: {
+      itemKeys: z.array(objectKey).min(1).max(50).describe('Keys of the items to restore, at most 50 per call.'),
+      groupId: groupIdParam,
+    },
+    outputSchema: {
+      restored: z.array(z.string()),
+      wereNotInTrash: z.array(z.string()),
+      notFound: z.array(z.string()),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+    handler: async ({ itemKeys, groupId }) => {
+      const prefix = libraryPrefix(libraryOf({ groupId }));
+      const result = await setTrashed(client, prefix, itemKeys, false);
+      if (result.missing.length && !result.changed.length && !result.alreadyThere.length) {
+        throw new ZoteroInputError(
+          `Item(s) not found in this library: ${result.missing.join(', ')}.`,
+          'An item erased permanently is gone for good and cannot be restored. Use ' +
+            'zotero_list_trash to see what is still recoverable.',
+        );
+      }
+      return ok({ restored: result.changed, wereNotInTrash: result.alreadyThere, notFound: result.missing });
+    },
+  });
+
+  defineTool(server, {
+    name: 'zotero_list_trash',
+    title: 'List the trash',
+    description:
+      'List the items currently in Zotero\'s trash, which are the ones zotero_restore_items can ' +
+      'bring back. Note that trashed *collections* do not appear here: Zotero\'s local API offers ' +
+      'no way to enumerate them, so a trashed collection can only be restored by key or from the ' +
+      'Zotero window.',
+    inputSchema: {
+      groupId: groupIdParam,
+      limit: limitParam,
+      start: startParam,
+      verbose: verboseParam,
+    },
+    outputSchema: { ...listOutputShape, items: z.array(zoteroObject) },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+    handler: async ({ groupId, limit, start, verbose }) => {
+      const prefix = libraryPrefix(libraryOf({ groupId }));
+      const response = await client.request<ZoteroEnvelope[]>({
+        path: `${prefix}/items/trash`,
+        query: { limit, start },
+      });
+      const items = compactList(response.data ?? [], verbose);
+      return ok({ ...pageInfo(items.length, start, response.totalResults), items });
+    },
+  });
+
+  defineTool(server, {
+    name: 'zotero_empty_trash',
+    title: 'Empty the trash',
+    description:
+      'Permanently erase every item in the trash. This is irreversible and removes attachment ' +
+      'files from disk. As an interlock against emptying a trash the caller has not looked at, ' +
+      'expectedCount must equal the number of items actually in it: call zotero_list_trash first ' +
+      'and pass its totalResults. If the two disagree the call is refused and nothing is deleted. ' +
+      'Only use this when the user has explicitly asked to empty the trash.',
+    inputSchema: {
+      expectedCount: z
+        .number()
+        .int()
+        .min(0)
+        .describe('How many items you expect to erase, from zotero_list_trash. A mismatch aborts the call.'),
+      groupId: groupIdParam,
+    },
+    outputSchema: {
+      erased: z.number(),
+      libraryVersion: z.number().nullable(),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
+    handler: async ({ expectedCount, groupId }) => {
+      const prefix = libraryPrefix(libraryOf({ groupId }));
+      const trash = await client.request<ZoteroEnvelope[]>({
+        path: `${prefix}/items/trash`,
+        query: { limit: 1, format: 'json' },
+      });
+      const actual = trash.totalResults ?? 0;
+      if (actual !== expectedCount) {
+        throw new ZoteroInputError(
+          `Refusing to empty the trash: expected ${expectedCount} items, found ${actual}.`,
+          'The interlock exists so this can never run on a trash the caller has not inspected. ' +
+            'Call zotero_list_trash, show the user what is in there, and pass its totalResults.',
+        );
+      }
+      if (actual === 0) return ok({ erased: 0, libraryVersion: null });
+
+      // Erase in batches, since the API caps a delete at 50 keys.
+      let erased = 0;
+      let lastVersion: number | null = null;
+      for (;;) {
+        const page = await client.request<ZoteroEnvelope[]>({
+          path: `${prefix}/items/trash`,
+          query: { limit: 50 },
+        });
+        const keys = (page.data ?? []).map((entry) => entry.key).filter((k): k is string => !!k);
+        if (!keys.length) break;
+        const version = await libraryVersion(client, prefix);
+        const response = await client.request<unknown>({
+          method: 'DELETE',
+          path: `${prefix}/items`,
+          query: { itemKey: keys.join(',') },
+          headers: { 'If-Unmodified-Since-Version': String(version) },
+        });
+        lastVersion = response.version;
+        erased += keys.length;
+      }
+      return ok({ erased, libraryVersion: lastVersion });
     },
   });
 

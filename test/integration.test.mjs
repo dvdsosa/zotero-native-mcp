@@ -43,7 +43,7 @@ describe('integration (live Zotero)', { skip: available ? false : 'Zotero is not
 
   test('every tool is registered with a description and schema', async () => {
     const { tools } = await client.listTools();
-    assert.equal(tools.length, 24);
+    assert.equal(tools.length, 28);
     for (const tool of tools) {
       assert.ok(tool.description?.length > 40, `${tool.name} needs a real description`);
       assert.ok(tool.inputSchema, `${tool.name} needs an input schema`);
@@ -58,6 +58,11 @@ describe('integration (live Zotero)', { skip: available ? false : 'Zotero is not
     assert.equal(byName.zotero_create_items.readOnlyHint, false);
     assert.equal(byName.zotero_delete_items.destructiveHint, true);
     assert.equal(byName.zotero_delete_collection.destructiveHint, true);
+    // Restoring can only put things back, never take them away.
+    assert.equal(byName.zotero_restore_items.destructiveHint, false);
+    assert.equal(byName.zotero_restore_collection.destructiveHint, false);
+    assert.equal(byName.zotero_list_trash.readOnlyHint, true);
+    assert.equal(byName.zotero_empty_trash.destructiveHint, true);
     // Nothing here reaches beyond the local Zotero instance.
     for (const annotations of Object.values(byName)) {
       assert.equal(annotations.openWorldHint, false);

@@ -10,7 +10,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { ZoteroLocalClient, libraryPrefix } from '../client.js';
-import { ZoteroInputError } from '../errors.js';
+import { ZoteroHttpError, ZoteroInputError } from '../errors.js';
 import { ZoteroEnvelope, compactList, compactObject, ok, pageInfo } from '../format.js';
 import {
   defineTool,
@@ -35,6 +35,41 @@ function summarizeFailures(results: WriteResults): string[] {
   return Object.entries(results.failed ?? {}).map(
     ([index, failure]) => `index ${index}${failure.key ? ` (${failure.key})` : ''}: ${failure.code} ${failure.message}`,
   );
+}
+
+/**
+ * Sets or clears the trash flag on collections.
+ *
+ * Zotero keeps trashed collections in its own `deletedCollections` table: the
+ * collection disappears from the sidebar but survives intact and restorable.
+ * Note that the local API cannot *enumerate* them, so a caller must hold the key.
+ */
+async function setCollectionsTrashed(
+  client: ZoteroLocalClient,
+  prefix: string,
+  collectionKeys: string[],
+  deleted: boolean,
+): Promise<{ changed: string[]; missing: string[] }> {
+  const changed: string[] = [];
+  const missing: string[] = [];
+
+  for (const key of collectionKeys) {
+    let current: { version?: number };
+    try {
+      const response = await client.request<{ version?: number }>({ path: `${prefix}/collections/${key}` });
+      current = response.data;
+    } catch (error) {
+      if (error instanceof ZoteroHttpError && error.status === 404) { missing.push(key); continue; }
+      throw error;
+    }
+    await client.request<unknown>({
+      method: 'PATCH',
+      path: `${prefix}/collections/${key}`,
+      body: { version: current.version ?? 0, deleted },
+    });
+    changed.push(key);
+  }
+  return { changed, missing };
 }
 
 export function registerCollectionTools(server: McpServer, client: ZoteroLocalClient): void {
@@ -204,21 +239,56 @@ export function registerCollectionTools(server: McpServer, client: ZoteroLocalCl
     name: 'zotero_delete_collection',
     title: 'Delete collections',
     description:
-      'Delete one or more collections. The items inside are NOT deleted: they stay in the library ' +
-      'and remain in any other collection they belong to. Subcollections of a deleted collection are ' +
-      'deleted with it. This is not reversible through the API, so confirm with the user first.',
+      'Move collections to Zotero\'s trash, which is reversible and the default. The items inside ' +
+      'are never deleted either way: they stay in the library and in any other collection they ' +
+      'belong to. Subcollections follow their parent. Pass permanent: true only on an explicit ' +
+      'request from the user, to erase the collections outright with no way back. Note that a ' +
+      'trashed collection cannot be listed through the local API, so record the key returned here ' +
+      'if it may need restoring.',
     inputSchema: {
       collectionKeys: z
         .array(objectKey)
         .min(1)
         .max(50)
-        .describe('Keys of the collections to delete, at most 50 per call.'),
+        .describe('Keys of the collections to remove, at most 50 per call.'),
+      permanent: z
+        .boolean()
+        .default(false)
+        .describe(
+          'false (default) moves the collections to the trash, which is reversible. true erases ' +
+            'them irreversibly. Only pass true on an explicit request from the user.',
+        ),
       groupId: groupIdParam,
     },
-    outputSchema: { deleted: z.array(z.string()), libraryVersion: z.number().nullable() },
+    outputSchema: {
+      permanent: z.boolean(),
+      trashed: z.array(z.string()).describe('Collections moved to the trash. Empty when permanent is true.'),
+      erased: z.array(z.string()).describe('Collections erased irreversibly. Empty when permanent is false.'),
+      notFound: z.array(z.string()),
+      libraryVersion: z.number().nullable(),
+    },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
-    handler: async ({ collectionKeys, groupId }) => {
+    handler: async ({ collectionKeys, permanent, groupId }) => {
       const prefix = libraryPrefix(libraryOf({ groupId }));
+
+      if (!permanent) {
+        const result = await setCollectionsTrashed(client, prefix, collectionKeys, true);
+        if (result.missing.length && !result.changed.length) {
+          throw new ZoteroInputError(
+            `Collection(s) not found in this library: ${result.missing.join(', ')}.`,
+            'Verify the keys with zotero_list_collections, and check the groupId if they belong ' +
+              'to a group library.',
+          );
+        }
+        return ok({
+          permanent: false,
+          trashed: result.changed,
+          erased: [],
+          notFound: result.missing,
+          libraryVersion: null,
+        });
+      }
+
       const version = await libraryVersion(client, prefix);
       const response = await client.request<unknown>({
         method: 'DELETE',
@@ -226,7 +296,45 @@ export function registerCollectionTools(server: McpServer, client: ZoteroLocalCl
         query: { collectionKey: collectionKeys.join(',') },
         headers: { 'If-Unmodified-Since-Version': String(version) },
       });
-      return ok({ deleted: collectionKeys, libraryVersion: response.version });
+      return ok({
+        permanent: true,
+        trashed: [],
+        erased: collectionKeys,
+        notFound: [],
+        libraryVersion: response.version,
+      });
+    },
+  });
+
+  defineTool(server, {
+    name: 'zotero_restore_collection',
+    title: 'Restore collections from the trash',
+    description:
+      'Bring collections back out of Zotero\'s trash, undoing a non-permanent ' +
+      'zotero_delete_collection. You must know the key: Zotero\'s local API cannot list trashed ' +
+      'collections, so there is no way to discover them from here — the user can see them in the ' +
+      'Zotero window\'s trash. A collection erased permanently cannot be restored at all.',
+    inputSchema: {
+      collectionKeys: z
+        .array(objectKey)
+        .min(1)
+        .max(50)
+        .describe('Keys of the collections to restore, at most 50 per call.'),
+      groupId: groupIdParam,
+    },
+    outputSchema: { restored: z.array(z.string()), notFound: z.array(z.string()) },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+    handler: async ({ collectionKeys, groupId }) => {
+      const prefix = libraryPrefix(libraryOf({ groupId }));
+      const result = await setCollectionsTrashed(client, prefix, collectionKeys, false);
+      if (result.missing.length && !result.changed.length) {
+        throw new ZoteroInputError(
+          `Collection(s) not found in this library: ${result.missing.join(', ')}.`,
+          'A collection erased permanently is gone for good. Trashed ones are still addressable ' +
+            'by key even though they cannot be listed.',
+        );
+      }
+      return ok({ restored: result.changed, notFound: result.missing });
     },
   });
 }

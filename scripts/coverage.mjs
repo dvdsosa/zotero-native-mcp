@@ -143,9 +143,18 @@ const tagsOk = (after?.item?.tags ?? []).length === 2;
 console.log(`  update_item verified: title=${titleOk} tags=${tagsOk} extra=${after?.item?.extra === 'set by coverage run'}`);
 if (!titleOk || !tagsOk) results.set('zotero_update_item', { ok: false, note: 'change did not persist' });
 
-// Trash round trip, which is the recoverable form of delete.
-await run('zotero_update_item', { ...lib, itemKey, fields: { deleted: true } });
-await run('zotero_update_item', { ...lib, itemKey, fields: { deleted: false } });
+// The trash round trip, which is what a plain delete now does.
+await run('zotero_delete_items', { ...lib, itemKeys: [itemKey] });
+const trash = await run('zotero_list_trash', { ...lib, limit: 200 });
+const inTrash = (trash?.items ?? []).some((i) => i.key === itemKey);
+await run('zotero_restore_items', { ...lib, itemKeys: [itemKey] });
+const restored = await run('zotero_get_item', { ...lib, itemKey });
+console.log(`  trash round trip: listed=${inTrash} restored=${restored?.item?.key === itemKey}`);
+if (!inTrash) results.set('zotero_list_trash', { ok: false, note: 'trashed item did not appear' });
+
+// The interlock must refuse a count the caller did not verify.
+await run('zotero_empty_trash', { ...lib, expectedCount: 987654 },
+  { expectError: true, note: 'interlock refuses a wrong count' });
 
 // A real PDF, not a text file: content type detection and indexing differ.
 const pdfPath = join(tmpdir(), `cov-${stamp}.pdf`);
@@ -175,9 +184,13 @@ await run('zotero_get_attachment_path', { ...lib, itemKey });
 await run('zotero_remove_items_from_collection', { ...lib, itemKeys: [itemKey], collectionKey: colKey });
 await run('zotero_add_items_to_collection', { ...lib, itemKeys: [itemKey], collectionKey: colKey });
 
-  await run('zotero_delete_items', { ...lib, itemKeys: [itemKey] });
+  await run('zotero_delete_collection', { ...lib, collectionKeys: [colKey] });
+  await run('zotero_restore_collection', { ...lib, collectionKeys: [colKey] });
+
+  // Permanent removal, so the run leaves nothing behind at all.
+  await run('zotero_delete_items', { ...lib, itemKeys: [itemKey], permanent: true });
   created.items.length = 0;
-  await run('zotero_delete_collection', { ...lib, collectionKeys: created.collections });
+  await run('zotero_delete_collection', { ...lib, collectionKeys: created.collections, permanent: true });
   created.collections.length = 0;
 } finally {
   // Anything the happy path did not already remove.
@@ -185,11 +198,11 @@ await run('zotero_add_items_to_collection', { ...lib, itemKeys: [itemKey], colle
   if (created.items.length || created.collections.length) {
     console.log('\n  Run did not finish; removing what it had created…');
     if (created.items.length) {
-      await client.callTool({ name: 'zotero_delete_items', arguments: { ...lib, itemKeys: created.items } })
+      await client.callTool({ name: 'zotero_delete_items', arguments: { ...lib, itemKeys: created.items, permanent: true } })
         .catch(() => console.log(`  ! could not delete items ${created.items.join(', ')} — remove them by hand`));
     }
     if (created.collections.length) {
-      await client.callTool({ name: 'zotero_delete_collection', arguments: { ...lib, collectionKeys: created.collections } })
+      await client.callTool({ name: 'zotero_delete_collection', arguments: { ...lib, collectionKeys: created.collections, permanent: true } })
         .catch(() => console.log(`  ! could not delete collections ${created.collections.join(', ')} — remove them by hand`));
     }
   }

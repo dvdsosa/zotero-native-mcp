@@ -10,8 +10,9 @@ knowledge is assumed.
 > [!WARNING]
 > This lesson creates, modifies and deletes real items in your library. Back up
 > your Zotero data directory before starting — see
-> [Back up your library first](../README.md#back-up-your-library-first). The
-> delete tools bypass Zotero's trash and cannot be undone.
+> [Back up your library first](../README.md#back-up-your-library-first).
+> Deleting goes to Zotero's trash and is reversible, but the tools also offer a
+> permanent mode that is not.
 
 ## Step 1: Check your Zotero version
 
@@ -174,9 +175,17 @@ entry rather than a BibTeX record.
 > Delete the "MCP Tutorial" collection.
 
 Deleting a collection does **not** delete the items inside it. They stay in your
-library, and in any other collection they belong to. If you also want the
-article gone, ask for it explicitly — but note that `zotero_delete_items`
-bypasses the trash and is not reversible.
+library, and in any other collection they belong to.
+
+The collection goes to Zotero's trash rather than disappearing, so you can undo
+this. Try it:
+
+> Restore that collection.
+
+If you also want the article gone, ask for it explicitly. It too goes to the
+trash, and "Show me what is in my Zotero trash" lists what can still be brought
+back. Only `permanent: true` erases for good — an assistant should not use it
+unless you ask.
 
 ## What you learned
 
@@ -187,7 +196,7 @@ create a collection, add a reference, attach a PDF, export a citation.
 ## Where to go next
 
 - **[Attach PDFs](how-to/attach-pdfs.md)** — batch-attach a folder of downloads.
-- **[Reference](reference.md)** — the full catalogue of all 24 tools.
+- **[Reference](reference.md)** — the full catalogue of all 28 tools.
 - **[Architecture](explanation/architecture.md)** — why this server needs no
   plugin and no API key, and what changed in Zotero 10.
 

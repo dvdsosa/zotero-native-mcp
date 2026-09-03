@@ -61,7 +61,7 @@ npm run build
 npm test
 ```
 
-`npm test` runs 67 tests using `node:test`, which ships with Node — there is no
+`npm test` runs 71 tests using `node:test`, which ships with Node — there is no
 test framework to install. Five of the six suites need no Zotero at all, because
 `test/helpers/mock-zotero.mjs` imitates Zotero's local API well enough to
 exercise the real protocol:
@@ -87,7 +87,7 @@ against your own library and say so in the pull request:
 node scripts/coverage.mjs
 ```
 
-It calls all 24 tools and reports which ones ran. It creates its own collection,
+It calls all 28 tools and reports which ones ran. It creates its own collection,
 item and attachments and deletes them in a `finally` block, so nothing of yours
 is touched even if the run dies partway. `scripts/smoke.mjs` covers narrower
 slices — see `read`, `write` and `group`.

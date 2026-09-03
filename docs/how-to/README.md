@@ -9,6 +9,8 @@ Problem-oriented recipes. Each guide assumes you already have the server working
   understand why keys are library-scoped.
 - **[Migrate from another Zotero MCP](migrating.md)** — switch from a web-API or
   plugin-based server, and what you gain and lose.
+- **[Recover something you deleted](recover-deleted-items.md)** — the trash, what
+  is restorable, and what is not.
 - **[Troubleshooting](troubleshooting.md)** — connection failures, `401`s,
   missing full text, batch limits.
 

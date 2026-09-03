@@ -66,7 +66,7 @@ verified, and this table is the honest extent of it.
 | Zotero | 10.0.1 |
 | Node.js | 26.8 locally; 20, 22 and 24 in CI |
 | MCP client | Claude Code 2.1 |
-| Libraries | Personal **and** group — all 24 tools exercised in both |
+| Libraries | Personal **and** group — all 28 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
 Windows × Node 20, 22 and 24**, so portability of the code itself is covered on
@@ -82,14 +82,19 @@ are the most useful issues this project can receive right now.
 ## Back up your library first
 
 > [!WARNING]
-> **This server can permanently modify and delete items in your Zotero library.**
-> Back it up before you start, and keep backing it up.
+> **This server can modify and delete items in your Zotero library.** Back it up
+> before you start, and keep backing it up.
 >
-> `zotero_delete_items` and `zotero_delete_collection` **bypass Zotero's trash**;
-> deleting an item also removes its attachment files from disk. There is no undo,
-> and the local API offers no way to recover them. On top of that, the tools are
-> driven by an AI assistant interpreting instructions in natural language, which
-> can misread which item you meant.
+> Deleting is reversible by default: `zotero_delete_items` and
+> `zotero_delete_collection` move things to **Zotero's trash**, where you can
+> restore them from the Zotero window or with `zotero_restore_items`. But Zotero
+> empties that trash automatically after 30 days, and both tools take a
+> `permanent: true` that erases outright — no undo, attachment files removed from
+> disk, nothing in the API able to bring them back. `zotero_empty_trash` does the
+> same to everything already in the trash.
+>
+> These tools are driven by an assistant interpreting instructions in natural
+> language, which can misread which item you meant.
 >
 > **To back up:** quit Zotero, then copy your whole data directory — `~/Zotero`
 > on macOS and Linux, `%USERPROFILE%\Zotero` on Windows, or whatever
@@ -134,19 +139,21 @@ it. Choose **"Always Allow"** so you are not asked again.
 | Document | What it covers |
 |---|---|
 | 📚 **[Tutorial](docs/tutorial.md)** | New here? Ten minutes from install to filing a paper with its PDF. |
-| 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |
-| 📖 **[Reference](docs/reference.md)** | All 24 tools, parameters, outputs, limits, environment variables. |
+| 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Recover a deletion](docs/how-to/recover-deleted-items.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |
+| 📖 **[Reference](docs/reference.md)** | All 28 tools, parameters, outputs, limits, environment variables. |
 | 💡 **[Explanation](docs/explanation/)** | [Architecture](docs/explanation/architecture.md) · [Linked vs imported attachments](docs/explanation/attachments.md) · [How authorization works](docs/explanation/authorization.md) |
-| 🛠 **[Contributing](docs/CONTRIBUTING.md)** | Development setup, the 67-test suite, and exercising every tool against a live Zotero. |
+| 🛠 **[Contributing](docs/CONTRIBUTING.md)** | Development setup, the 71-test suite, and exercising every tool against a live Zotero. |
 
 ## Tools at a glance
 
 **Collections** — `list_collections` `get_collection` `create_collection`
-`update_collection` `delete_collection`
+`update_collection` `delete_collection` `restore_collection`
 
 **Items** — `search_items` `get_item` `get_item_children` `create_items`
-`update_item` `delete_items` `add_items_to_collection`
+`update_item` `delete_items` `restore_items` `add_items_to_collection`
 `remove_items_from_collection` `get_item_fulltext` `export_items`
+
+**Trash** — `list_trash` `empty_trash` (and the `restore_*` tools above)
 
 **Attachments** — `attach_file` `get_attachment_path`
 

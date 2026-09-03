@@ -78,3 +78,40 @@ test('batch limits are enforced by the schema', async () => {
   const keys = Array.from({ length: 51 }, (_, i) => `KEY${String(i).padStart(5, '0')}`.slice(0, 8));
   await expectError('zotero_delete_items', { itemKeys: keys });
 });
+
+test('deleting is non-permanent unless asked, and the schema says so', async () => {
+  const { tools } = await client.listTools();
+  for (const name of ['zotero_delete_items', 'zotero_delete_collection']) {
+    const tool = tools.find((t) => t.name === name);
+    const permanent = tool.inputSchema.properties.permanent;
+    assert.equal(permanent.default, false, `${name} must default to the trash`);
+    assert.ok(!tool.inputSchema.required?.includes('permanent'));
+    assert.match(tool.description, /trash/i);
+    assert.match(tool.description, /permanent: true/);
+  }
+});
+
+test('the restore tools are advertised as non-destructive', async () => {
+  const { tools } = await client.listTools();
+  for (const name of ['zotero_restore_items', 'zotero_restore_collection']) {
+    const tool = tools.find((t) => t.name === name);
+    assert.ok(tool, `${name} should exist`);
+    assert.equal(tool.annotations.destructiveHint, false);
+    assert.equal(tool.annotations.idempotentHint, true);
+  }
+});
+
+test('emptying the trash requires an expected count', async () => {
+  const { tools } = await client.listTools();
+  const tool = tools.find((t) => t.name === 'zotero_empty_trash');
+  assert.ok(tool.inputSchema.required.includes('expectedCount'),
+    'the interlock must not be optional');
+  // Omitting it is a schema error, so the call cannot be made carelessly.
+  await expectError('zotero_empty_trash', {});
+});
+
+test('a wrong expected count refuses to empty anything', async () => {
+  const text = await expectError('zotero_empty_trash', { expectedCount: 987654 });
+  assert.match(text, /Refusing to empty the trash/);
+  assert.match(text, /zotero_list_trash/);
+});
