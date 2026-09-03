@@ -14,7 +14,7 @@ collections, add references, and attach PDFs from your disk.
 Every operation runs against the Zotero application on `127.0.0.1`. **No
 zotero.org account. No web API key. No Zotero plugin. No cloud round trip.**
 
-```
+```text
 You:     "File that arXiv paper under Thesis > Methods and attach the PDF
           I just downloaded."
 
@@ -35,7 +35,7 @@ This server uses the native capability directly. Nothing to install inside
 Zotero, no credentials to manage, and reads land in **8–60 ms** because nothing
 touches the network.
 
-| | Web API servers | Plugin-based servers | **zotero-native-mcp** |
+| Criterion | Web API servers | Plugin-based servers | **zotero-native-mcp** |
 |---|:---:|:---:|:---:|
 | Works offline | ❌ | ✅ | **✅** |
 | Needs a zotero.org API key | ✅ required | ❌ | **❌** |
@@ -60,7 +60,7 @@ and clients are expected to work — the server is portable TypeScript talking t
 `127.0.0.1`, with nothing platform-specific by design — but they have not been
 verified, and this table is the honest extent of it.
 
-| | Verified against |
+| Component | Verified against |
 |---|---|
 | Operating system | macOS 26.6, Apple Silicon |
 | Zotero | 10.0.1 |
@@ -78,6 +78,29 @@ Desktop, Cursor and other MCP clients.
 
 If you run it somewhere not on this list, a report either way is welcome — those
 are the most useful issues this project can receive right now.
+
+## Back up your library first
+
+> [!WARNING]
+> **This server can permanently modify and delete items in your Zotero library.**
+> Back it up before you start, and keep backing it up.
+>
+> `zotero_delete_items` and `zotero_delete_collection` **bypass Zotero's trash**;
+> deleting an item also removes its attachment files from disk. There is no undo,
+> and the local API offers no way to recover them. On top of that, the tools are
+> driven by an AI assistant interpreting instructions in natural language, which
+> can misread which item you meant.
+>
+> **To back up:** quit Zotero, then copy your whole data directory — `~/Zotero`
+> on macOS and Linux, `%USERPROFILE%\Zotero` on Windows, or whatever
+> **Settings → Advanced → Files and Folders** reports. It holds `zotero.sqlite`
+> and the `storage` folder with every attachment. Zotero's own guidance is at
+> [zotero.org/support/zotero_data](https://www.zotero.org/support/zotero_data).
+>
+> Syncing to zotero.org is **not** a backup: a deletion syncs too.
+>
+> This software is provided as is, without warranty of any kind, and its authors
+> accept no liability for data loss. See [LICENSE](LICENSE).
 
 ## Quick start
 
@@ -108,7 +131,7 @@ it. Choose **"Always Allow"** so you are not asked again.
 
 ## Documentation
 
-| | |
+| Document | What it covers |
 |---|---|
 | 📚 **[Tutorial](docs/tutorial.md)** | New here? Ten minutes from install to filing a paper with its PDF. |
 | 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |

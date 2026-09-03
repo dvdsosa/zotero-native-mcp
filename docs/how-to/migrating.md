@@ -52,7 +52,7 @@ Then clean up what it needed and this server does not:
 
 ## What changes in practice
 
-| | Web API server | This server |
+| Aspect | Web API server | This server |
 |---|---|---|
 | Credentials | API key + library ID | None |
 | Requires cloud sync | Yes, to see your data | No, reads your local database |

@@ -18,7 +18,7 @@ mode when you need it:
 
 > Attach it as an imported file so Zotero keeps its own copy.
 
-| | linked (default) | imported |
+| Aspect | linked (default) | imported |
 |---|---|---|
 | Speed | Instant, any size | Proportional to file size |
 | Original file | Must stay put | Can be moved or deleted |

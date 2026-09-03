@@ -7,6 +7,12 @@ PDF — into a collection you create along the way.
 You need a working Zotero installation and about ten minutes. No prior MCP
 knowledge is assumed.
 
+> [!WARNING]
+> This lesson creates, modifies and deletes real items in your library. Back up
+> your Zotero data directory before starting — see
+> [Back up your library first](../README.md#back-up-your-library-first). The
+> delete tools bypass Zotero's trash and cannot be undone.
+
 ## Step 1: Check your Zotero version
 
 Open Zotero and go to **Zotero → About Zotero** (macOS) or

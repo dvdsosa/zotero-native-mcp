@@ -31,7 +31,10 @@ object changed since you read it.
 **Batch limits.** Zotero caps writes and deletes at **50 objects per call**.
 
 **Annotations.** Each tool below is marked *read-only*, *write*, or
-*destructive*, matching the MCP annotations the server advertises.
+*destructive*, matching the MCP annotations the server advertises. The
+*destructive* ones bypass Zotero's trash and cannot be undone — back up your
+library before using them, as described in
+[Back up your library first](../README.md#back-up-your-library-first).
 
 ---
 

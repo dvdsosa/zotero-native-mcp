@@ -21,7 +21,7 @@ running, the test suite, and how to exercise the tools against a real Zotero.
 
 `<type>/<short-description>`, using the same types as the commit format:
 
-```
+```text
 feat/group-library-attachments
 fix/windows-file-url
 docs/clarify-linked-vs-imported
@@ -34,7 +34,7 @@ This repository uses [Conventional Commits](https://www.conventionalcommits.org/
 The subject line is `type(scope): summary`, where the scope is optional and
 names the part of the codebase affected:
 
-```
+```text
 fix(attachments): refuse linked files in group libraries up front
 feat(pagination): report hasMore alongside the paging cursor
 docs: move contributor material out of the README
