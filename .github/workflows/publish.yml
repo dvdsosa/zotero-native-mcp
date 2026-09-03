@@ -35,8 +35,32 @@ jobs:
       # predate OIDC support. Provenance is implied, so the flag is not passed.
       - run: npm install -g npm@latest
 
+      # Re-running a release must not fail on a version that is already out, so
+      # that a failure in a later step can be retried without a version bump.
       - name: Publish to npm
-        run: npm publish --access public
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "zotero-native-mcp@$VERSION" version >/dev/null 2>&1; then
+            echo "$VERSION is already on npm, skipping publish"
+          else
+            npm publish --access public
+          fi
+
+      # The registry verifies the npm package before accepting the server, and a
+      # publish takes a moment to reach every npm CDN node. Without this wait the
+      # registry reads a 404 for a version that was just published and rejects it.
+      - name: Wait for npm to serve the new version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          for i in $(seq 1 30); do
+            if curl -fsS "https://registry.npmjs.org/zotero-native-mcp/$VERSION" >/dev/null 2>&1; then
+              echo "$VERSION is being served after $((i * 10))s"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "npm did not serve $VERSION within 5 minutes"
+          exit 1
 
       - name: Install mcp-publisher
         run: |
