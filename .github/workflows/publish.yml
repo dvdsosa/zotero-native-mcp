@@ -1,7 +1,11 @@
 name: Publish
 
 # Publishes to npm and the official MCP Registry when a version tag is pushed.
-# The MCP Registry step uses GitHub OIDC, so no registry secret is stored here.
+#
+# Neither step stores a secret. Both authenticate with GitHub OIDC: npm through
+# trusted publishing, configured against this repository and this workflow file
+# on the package's npm settings page, and the registry through its own OIDC
+# login. Renaming this file breaks the npm trust relationship.
 
 on:
   push:
@@ -27,10 +31,12 @@ jobs:
       - run: npm run build
       - run: npm test
 
+      # Trusted publishing needs a recent npm; the one bundled with Node may
+      # predate OIDC support. Provenance is implied, so the flag is not passed.
+      - run: npm install -g npm@latest
+
       - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
 
       - name: Install mcp-publisher
         run: |
