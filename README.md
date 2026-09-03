@@ -62,20 +62,21 @@ verified, and this table is the honest extent of it.
 
 | Component | Verified against |
 |---|---|
-| Operating system | **macOS 26.6** (Apple Silicon) and **Windows 11 Pro** build 26200 (x64), each against a real Zotero |
+| Operating system | **macOS 26.6** (Apple Silicon), **Windows 11 Pro** build 26200 (x64) and **Ubuntu 24.04 LTS** (x86_64) — all three against a real Zotero |
 | Zotero | 10.0.1 |
-| Node.js | 26.8 on macOS, 22.23 on Windows; 22, 24 and 26 in CI |
-| MCP client | Claude Code 2.1, on both macOS and Windows |
+| Node.js | 26.8, 22.23 and 24.16 respectively; 22, 24 and 26 in CI |
+| MCP client | Claude Code 2.1, on macOS and Windows |
 | Libraries | Personal **and** group — all 28 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
 Windows × Node 22, 24 and 26**, so portability of the code itself is covered on
 all three platforms. What no runner can cover is the conversation with a real
-Zotero, since none is installed there — that has been done by hand on macOS and
-Windows, with `scripts/coverage.mjs` reaching all 28 tools on both.
+Zotero, since none is installed there. That part was done by hand:
+`scripts/coverage.mjs` reaches **all 28 tools on all three operating systems**,
+against a live library.
 
-**Not yet verified.** A real Zotero on Linux; Intel Macs; Claude Desktop,
-Cursor and other MCP clients.
+**Not yet verified.** Intel Macs; Claude Code on Linux, where only the scripts
+were run; Claude Desktop, Cursor and other MCP clients anywhere.
 
 If you run it somewhere not on this list, a report either way is welcome — those
 are the most useful issues this project can receive right now.
