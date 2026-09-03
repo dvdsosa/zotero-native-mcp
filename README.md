@@ -114,6 +114,7 @@ it. Choose **"Always Allow"** so you are not asked again.
 | 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |
 | 📖 **[Reference](docs/reference.md)** | All 24 tools, parameters, outputs, limits, environment variables. |
 | 💡 **[Explanation](docs/explanation/)** | [Architecture](docs/explanation/architecture.md) · [Linked vs imported attachments](docs/explanation/attachments.md) · [How authorization works](docs/explanation/authorization.md) |
+| 🛠 **[Contributing](docs/CONTRIBUTING.md)** | Development setup, the 67-test suite, and exercising every tool against a live Zotero. |
 
 ## Tools at a glance
 
@@ -155,63 +156,11 @@ library you only have cloud access to, those projects remain the right choice.
 
 ## Contributing
 
-Issues and pull requests are welcome. CI runs `npm run typecheck`,
-`npm run build` and `npm test`; all three must pass.
+Issues and pull requests are welcome. CI must pass on Linux, macOS and Windows
+across Node 20, 22 and 24.
 
-### Development
-
-```bash
-npm install
-npm run build       # compile to build/
-npm run watch       # compile on change
-npm run typecheck   # tsc --noEmit
-npm test            # the full suite
-npm run inspect     # build, then open the MCP Inspector
-```
-
-### Tests
-
-`npm test` runs 64 tests on `node:test`, with no test framework to install.
-
-| Suite | Covers |
-|---|---|
-| `test/format.test.mjs` | Response shaping and pagination arithmetic |
-| `test/config.test.mjs` | Environment parsing and defaults |
-| `test/keystore.test.mjs` | Key persistence, `0600` permissions, corrupt stores |
-| `test/client.test.mjs` | The wire protocol, against a mock Zotero |
-| `test/validation.test.mjs` | Argument rejection over stdio; needs no Zotero |
-| `test/integration.test.mjs` | The real server over stdio, against a live Zotero |
-
-`test/helpers/mock-zotero.mjs` reproduces the `Zotero-Server-ID` handshake and
-local API keys, so the protocol is exercised in CI with no Zotero installed.
-The integration suite skips itself when Zotero is unreachable, which is why CI
-stays green on a runner.
-
-These need a real Zotero and so are not part of `npm test`:
-
-```bash
-node scripts/smoke.mjs read      # read tools end to end
-node scripts/smoke.mjs write     # write path; needs a consent dialog, cleans up after itself
-node scripts/smoke.mjs group     # the same write cycle in a group library
-node scripts/coverage.mjs        # every tool, with a coverage report
-node scripts/coverage.mjs --group
-```
-
-`coverage.mjs` calls all 24 tools against a live library and reports which ones
-ran, so a tool cannot quietly go unexercised. It builds its own collection, item
-and attachments, and removes them in a `finally` block so a mid-run failure
-still cleans up. Both libraries currently report **24/24**, except
-`run_saved_search` in the group, which is skipped because that library holds no
-saved searches.
-
-### Evaluating tool descriptions
-
-[`evaluation/evaluation.xml`](evaluation/evaluation.xml) holds 12 question and
-answer pairs for checking whether a model can actually drive these tools to a
-correct answer — a test of the tool *descriptions* rather than the code. Run it
-with the harness from Anthropic's `mcp-builder` skill, pointed at any
-Anthropic-compatible endpoint. See [`.env.example`](.env.example) for the
-variables it reads.
+See **[CONTRIBUTING](docs/CONTRIBUTING.md)** for the development setup, the test
+suite, and the scripts that exercise every tool against a live Zotero.
 
 ## License
 

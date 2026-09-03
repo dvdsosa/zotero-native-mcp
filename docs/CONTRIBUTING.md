@@ -1,0 +1,110 @@
+# Contributing
+
+Issues and pull requests are welcome. This page covers getting the project
+running, the test suite, and how to exercise the tools against a real Zotero.
+
+## Setup
+
+```bash
+git clone https://github.com/dvdsosa/zotero-native-mcp.git
+cd zotero-native-mcp
+npm install
+npm run build
+```
+
+`npm run` lists every script; these are the ones worth knowing:
+
+| Command | Why you would run it |
+|---|---|
+| `npm run watch` | Recompile on save while working. |
+| `npm test` | The full suite. This is the bar for a pull request. |
+| `npm run inspect` | Open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) against a fresh build — a browser UI that lists the tools, shows their schemas, and lets you call one by hand and read the raw response. The fastest way to see what a tool actually returns without wiring up an assistant. |
+
+Point your own MCP client at the build to use it while developing:
+
+```bash
+claude mcp add zotero-dev -- node /absolute/path/to/build/index.js
+```
+
+## The bar for a pull request
+
+CI runs `npm run typecheck`, `npm run build` and `npm test` on **Linux, macOS
+and Windows across Node 20, 22 and 24** — nine jobs, with `fail-fast` off so one
+broken combination does not hide the others. All of it must pass.
+
+Two habits matter more than the checks:
+
+- **Errors are written for an agent.** Every failure should say what went wrong
+  *and* what the caller should do next. Compare the hints in `src/errors.ts`
+  before adding a new one.
+- **Tool descriptions are the interface.** A model only ever sees the name,
+  description and schema. A behaviour that is not described does not exist.
+
+## Tests
+
+`npm test` runs 67 tests on `node:test`. There is no test framework to install.
+
+| Suite | Covers | Needs Zotero |
+|---|---|:---:|
+| `test/format.test.mjs` | Response shaping and pagination arithmetic | no |
+| `test/config.test.mjs` | Environment parsing and defaults | no |
+| `test/keystore.test.mjs` | Key persistence, `0600` permissions, corrupt stores | no |
+| `test/client.test.mjs` | The wire protocol, against a mock Zotero | no |
+| `test/validation.test.mjs` | Argument rejection, over stdio | no |
+| `test/integration.test.mjs` | The real server over stdio | **yes** |
+
+`test/helpers/mock-zotero.mjs` stands in for Zotero's local API: it reproduces
+the `Zotero-Server-ID` handshake, local API keys including the single-use kind,
+and the status codes Zotero actually returns. That is what lets the protocol be
+tested on a CI runner with no Zotero installed.
+
+The integration suite skips itself when nothing answers on
+`127.0.0.1:23119`, so CI stays green without special handling.
+
+## Exercising a real library
+
+These scripts talk to a running Zotero and are not part of `npm test`. They
+create their own objects and delete them again; nothing pre-existing is touched.
+
+```bash
+node scripts/smoke.mjs read        # read tools, end to end
+node scripts/smoke.mjs write       # the write path
+node scripts/smoke.mjs group       # the same cycle in a group library
+node scripts/coverage.mjs          # every tool, with a coverage report
+node scripts/coverage.mjs --group
+```
+
+`coverage.mjs` is the thorough one. It calls all 24 tools, reports which ran,
+and distinguishes a real failure from a tool it had no data to exercise — a
+library with no saved searches cannot test `run_saved_search`, and that is not a
+defect. Cleanup runs in a `finally` block, so a run that dies partway still
+removes what it created.
+
+A write raises Zotero's consent dialog. Choose **"Always Allow"**: a plain
+"Allow" issues a single-use key, and every subsequent write then needs its own
+dialog.
+
+## Evaluating tool descriptions
+
+[`../evaluation/evaluation.xml`](../evaluation/evaluation.xml) holds 12 question
+and answer pairs. Running them checks something the test suite cannot: whether a
+model, given only the tool descriptions, can reach the right answer. It is a
+test of the writing, not the code.
+
+Use the harness from Anthropic's `mcp-builder` skill against any
+Anthropic-compatible endpoint:
+
+```bash
+ANTHROPIC_BASE_URL=https://openrouter.ai/api \
+ANTHROPIC_API_KEY=<key> \
+python evaluation.py -t stdio -c node -a build/index.js \
+  -m anthropic/claude-haiku-4.5 evaluation/evaluation.xml
+```
+
+See [`../.env.example`](../.env.example) for the variables it reads. The answers
+in that file are tied to one particular library, so replace them with facts from
+your own before running it.
+
+---
+
+<p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>
