@@ -3,6 +3,68 @@
 Issues and pull requests are welcome. This page covers getting the project
 running, the test suite, and how to exercise the tools against a real Zotero.
 
+## The workflow, start to finish
+
+1. **Open an issue first**, unless the change is a typo or a one-line fix. It is
+   cheaper to agree on an approach in an issue than to review a branch built on
+   the wrong one. Search the existing issues before filing; if one already
+   covers your case, comment there instead. GitHub will offer three templates —
+   bug report, feature request, and a **platform report** for telling us this
+   ran (or did not) somewhere the README has not verified.
+2. **Branch off `main`.** Never commit to `main` directly.
+3. **Commit in logical groups**, following the message format below.
+4. **Run the checks** before opening the pull request.
+5. **Open the pull request.** A template is filled in for you; reference the
+   issue with `Closes #123` so it closes when the branch merges.
+
+### Branch names
+
+`<type>/<short-description>`, using the same types as the commit format:
+
+```
+feat/group-library-attachments
+fix/windows-file-url
+docs/clarify-linked-vs-imported
+ci/add-node-24
+```
+
+### Commit messages
+
+This repository uses [Conventional Commits](https://www.conventionalcommits.org/).
+The subject line is `type(scope): summary`, where the scope is optional and
+names the part of the codebase affected:
+
+```
+fix(attachments): refuse linked files in group libraries up front
+feat(pagination): report hasMore alongside the paging cursor
+docs: move contributor material out of the README
+ci: run the suite on Linux, macOS and Windows
+```
+
+Types in use here: `feat`, `fix`, `docs`, `ci`, `chore`. Scopes are drawn from
+the source layout — `client`, `auth`, `attachments`, `collections`, `items`,
+`pagination`.
+
+Keep the subject under about 72 characters, in the imperative mood ("refuse",
+not "refused" or "refuses"). Then leave a blank line and explain **why** the
+change was needed in the body. A reader six months from now can see what the
+diff did; what they cannot recover is the reasoning, so that is what the body is
+for. Look at `git log` for the tone.
+
+### Before you open the pull request
+
+Run these and confirm they pass:
+
+```bash
+npm run typecheck
+npm run build
+npm test
+```
+
+If your change touches how the server talks to Zotero, also run
+`node scripts/coverage.mjs` against a real library and say so in the pull
+request — CI cannot do that, because no runner has Zotero installed.
+
 ## Setup
 
 ```bash
