@@ -103,3 +103,7 @@ Turn on Zotero's own logging — **Help → Debug Output Logging → View Output
 and reproduce the problem. It shows the requests Zotero received and why it
 rejected them. Include that output when
 [opening an issue](https://github.com/dvdsosa/zotero-native-mcp/issues).
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

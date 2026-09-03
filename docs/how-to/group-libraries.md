@@ -60,3 +60,7 @@ you have write access to a group before you try.
 If a write to a group fails with `403`, you have read-only access to that
 library. Check your role at
 [zotero.org/groups](https://www.zotero.org/groups).
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

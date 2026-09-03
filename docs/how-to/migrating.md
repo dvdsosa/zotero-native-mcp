@@ -77,3 +77,7 @@ are leaving:
 
 If any of those matter, keeping both servers registered is legitimate — just
 name them distinctly so your assistant can tell them apart.
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

@@ -184,3 +184,7 @@ create a collection, add a reference, attach a PDF, export a citation.
 - **[Reference](reference.md)** — the full catalogue of all 24 tools.
 - **[Architecture](explanation/architecture.md)** — why this server needs no
   plugin and no API key, and what changed in Zotero 10.
+
+---
+
+<p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>

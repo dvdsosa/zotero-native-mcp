@@ -9,3 +9,7 @@ documentation for four different needs.
 | **[How-to guides](how-to/)** | You have a specific task and want the recipe. |
 | **[Reference](reference.md)** | You need exact parameters, outputs and limits. |
 | **[Explanation](explanation/)** | You want to understand why the design is what it is. |
+
+---
+
+<p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>

@@ -95,3 +95,7 @@ this; it indicates a bug. Please
 
 **Imported attachment fails above 4 GB** — Zotero does not support stored files
 that large. Use linked mode, which has no size limit.
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

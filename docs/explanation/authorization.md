@@ -118,3 +118,7 @@ keys. **Always Allow** ends it.
 - [Troubleshooting authorization](../how-to/troubleshooting.md#writes-fail-with-401)
 - [`zotero_authorize` reference](../reference.md#zotero_authorize--write)
 - [Architecture](architecture.md)
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

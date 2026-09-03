@@ -11,3 +11,7 @@ Problem-oriented recipes. Each guide assumes you already have the server working
   plugin-based server, and what you gain and lose.
 - **[Troubleshooting](troubleshooting.md)** — connection failures, `401`s,
   missing full text, batch limits.
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

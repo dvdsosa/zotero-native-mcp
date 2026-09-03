@@ -86,3 +86,7 @@ worth more than the flexibility given up.
 - [Zotero's local API documentation](https://www.zotero.org/support/dev/web_api/v3/local_api)
 - [How authorization works](authorization.md)
 - [Linked vs imported attachments](attachments.md)
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

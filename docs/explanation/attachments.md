@@ -82,3 +82,7 @@ mark every file as ancient.
 
 - [How to attach PDFs](../how-to/attach-pdfs.md)
 - [`zotero_attach_file` reference](../reference.md#zotero_attach_file--write)
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>

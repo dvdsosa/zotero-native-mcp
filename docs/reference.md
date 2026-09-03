@@ -413,3 +413,7 @@ Properties of Zotero's local API, not of this server:
 - Full text covers only what Zotero has indexed.
 - Atom output is unsupported; quicksearch ranking may differ slightly from the
   web API's.
+
+---
+
+<p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>

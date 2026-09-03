@@ -9,3 +9,7 @@ do; for instructions see the [how-to guides](../how-to/).
   the upload protocol actually does.
 - **[How authorization works](authorization.md)** — the consent dialog,
   single-use keys, and the instance check.
+
+---
+
+<p align="center"><a href="../../README.md">⬅ <b>Back to the main README</b></a></p>
