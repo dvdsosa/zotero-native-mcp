@@ -1,169 +1,145 @@
 # zotero-native-mcp
 
-An MCP server for Zotero that runs entirely on `127.0.0.1`.
+**An MCP server that reads *and writes* your Zotero library, entirely offline.**
 
-Every operation — reads *and* writes — is served by the Zotero application
-itself over its local HTTP API. There is no zotero.org account, no web API key,
-no network round trip, no rate limit, and no Zotero plugin to install.
+[![npm](https://img.shields.io/npm/v/zotero-native-mcp)](https://www.npmjs.com/package/zotero-native-mcp)
+[![CI](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+Connect Zotero to Claude, Claude Code, Cursor, or any [Model Context Protocol](https://modelcontextprotocol.io)
+client. Your assistant can search your library, read PDF full text, create
+collections, add references, and attach PDFs from your disk.
+
+Every operation runs against the Zotero application on `127.0.0.1`. **No
+zotero.org account. No web API key. No Zotero plugin. No cloud round trip.**
+
+```
+You:     "File that arXiv paper under Thesis > Methods and attach the PDF
+          I just downloaded."
+
+Claude:  ✓ created collection "Methods" under "Thesis"
+         ✓ added "Attention Is All You Need" (Vaswani et al., 2017)
+         ✓ attached transformer.pdf                          … in 180 ms
+```
 
 ## Why this exists
 
-Zotero 7.1 shipped a complete local implementation of the Zotero Web API v3 at
-`http://127.0.0.1:23119/api`, and unlike the read-only local endpoint that
-preceded it, **it accepts writes**. That makes the older architectures for
-local Zotero tooling unnecessary:
+Zotero 10 added **write support to its built-in local API**. Before that, every
+Zotero MCP server had to work around a read-only local endpoint — either by
+routing writes through `api.zotero.org` (slow, needs an API key, needs your
+library synced to the cloud) or by shipping a separate Zotero plugin you had to
+install and keep up to date.
 
-| Approach | Local | Writes | Extra moving parts |
-| :--- | :---: | :---: | :--- |
-| MCP over `api.zotero.org` | ❌ | ✅ | API key, cloud latency (~0.5–1.5 s) |
-| Zotero `.xpi` plugin exposing its own endpoint | ✅ | ✅ | A plugin to build, install and keep current with Zotero |
-| Hybrid daemon + write connector | ✅ | ✅ | A second process outside Zotero |
-| **This server, over the built-in local API** | ✅ | ✅ | **None** |
+This server uses the native capability directly. Nothing to install inside
+Zotero, no credentials to manage, and reads land in **8–60 ms** because nothing
+touches the network.
 
-Measured against a ~2000-item library: reads 8–60 ms, search 100–300 ms.
+| | Web API servers | Plugin-based servers | **zotero-native-mcp** |
+|---|:---:|:---:|:---:|
+| Works offline | ❌ | ✅ | **✅** |
+| Needs a zotero.org API key | ✅ required | ❌ | **❌** |
+| Needs a Zotero plugin (`.xpi`) | ❌ | ✅ required | **❌** |
+| Create collections | ✅ | ✅ | **✅** |
+| Attach local PDFs | ⚠️ via cloud | ✅ | **✅** |
+| Typical read latency | 500–1500 ms | <50 ms | **8–60 ms** |
 
 ## Requirements
 
-- **Zotero 7.1 or newer**, running. (Developed against Zotero 10.)
-- Zotero → Settings → Advanced → **"Allow other applications on this computer to
-  communicate with Zotero"** enabled.
+- **Zotero 10 or newer**, running. Earlier versions have a read-only local API;
+  write tools will not work.
+- Zotero → **Settings → Advanced** → enable
+  **"Allow other applications on this computer to communicate with Zotero"**.
 - Node.js 20+.
 
-## Install
+## Quick start
 
 ```bash
-npm install
-npm run build
+claude mcp add zotero-native-mcp -- npx -y zotero-native-mcp
 ```
 
-Register it with an MCP client. For Claude Code:
-
-```bash
-claude mcp add zotero-native-mcp -- node /absolute/path/to/build/index.js
-```
-
-Or by hand, in an MCP client config:
+<details>
+<summary>Other clients (Claude Desktop, Cursor, …)</summary>
 
 ```json
 {
   "mcpServers": {
     "zotero-native-mcp": {
-      "command": "node",
-      "args": ["/absolute/path/to/build/index.js"]
+      "command": "npx",
+      "args": ["-y", "zotero-native-mcp"]
     }
   }
 }
 ```
+</details>
 
-No environment variables are needed on a stock install.
+No environment variables are needed. Ask your assistant to run `zotero_status`
+to confirm the connection.
 
-## Authorization
+The first time a tool **writes**, Zotero shows a dialog asking whether to allow
+it. Choose **"Always Allow"** so you are not asked again.
 
-Reads need no authorization. The first **write** raises a modal dialog inside
-Zotero offering *Allow* (a single-use key), *Always Allow* (a persistent key),
-and *Deny*. Choosing *Always Allow* stores a key under
-`~/.config/zotero-native-mcp/keys.json` (mode `0600`), keyed by Zotero instance,
-and it is reused from then on.
+## Documentation
 
-A single-use key is consumed by the write that validates it, so the server
-re-authorizes transparently when it sees a `401` — which is why a session that
-picked *Allow* will keep raising dialogs. Call `zotero_authorize` up front to
-grant access deliberately rather than being interrupted mid-task.
+| | |
+|---|---|
+| 📚 **[Tutorial](docs/tutorial.md)** | New here? Ten minutes from install to filing a paper with its PDF. |
+| 🔧 **[How-to guides](docs/how-to/)** | [Attach PDFs](docs/how-to/attach-pdfs.md) · [Group libraries](docs/how-to/group-libraries.md) · [Migrate from another Zotero MCP](docs/how-to/migrating.md) · [Troubleshooting](docs/how-to/troubleshooting.md) |
+| 📖 **[Reference](docs/reference.md)** | All 24 tools, parameters, outputs, limits, environment variables. |
+| 💡 **[Explanation](docs/explanation/)** | [Architecture](docs/explanation/architecture.md) · [Linked vs imported attachments](docs/explanation/attachments.md) · [How authorization works](docs/explanation/authorization.md) |
 
-## Tools
+## Tools at a glance
 
-**Connection and schema**
-| Tool | Purpose |
-| :--- | :--- |
-| `zotero_status` | Connection, Zotero version, instance ID, write-access state |
-| `zotero_authorize` | Request write access (raises the consent dialog) |
-| `zotero_list_libraries` | Personal library plus group libraries and their IDs |
-| `zotero_get_item_type_fields` | Valid fields and creator types for an item type |
+**Collections** — `list_collections` `get_collection` `create_collection`
+`update_collection` `delete_collection`
 
-**Collections**
-| Tool | Purpose |
-| :--- | :--- |
-| `zotero_list_collections` | Flat tree, top level, or children of one collection |
-| `zotero_get_collection` | One collection with its version |
-| `zotero_create_collection` | Create collections and subcollections (≤50/call) |
-| `zotero_update_collection` | Rename, or re-parent (`parentCollectionKey: null` → root) |
-| `zotero_delete_collection` | Delete collections; contained items survive |
+**Items** — `search_items` `get_item` `get_item_children` `create_items`
+`update_item` `delete_items` `add_items_to_collection`
+`remove_items_from_collection` `get_item_fulltext` `export_items`
 
-**Items**
-| Tool | Purpose |
-| :--- | :--- |
-| `zotero_search_items` | Quicksearch with `everything` mode, plus type/tag/collection filters |
-| `zotero_get_item` | One item, optionally with its children |
-| `zotero_get_item_children` | Child notes, attachments and annotations |
-| `zotero_create_items` | Create items (≤50/call), filed into collections at creation |
-| `zotero_update_item` | Patch fields with optimistic concurrency |
-| `zotero_delete_items` | Permanent delete (bypasses the trash) |
-| `zotero_add_items_to_collection` | File items, **merging** with existing membership |
-| `zotero_remove_items_from_collection` | Unfile items without deleting them |
-| `zotero_get_item_fulltext` | Zotero's indexed attachment text |
-| `zotero_export_items` | BibTeX, BibLaTeX, RIS, CSL-JSON, CSV, TEI, or a rendered bibliography |
+**Attachments** — `attach_file` `get_attachment_path`
 
-**Attachments**
-| Tool | Purpose |
-| :--- | :--- |
-| `zotero_attach_file` | Attach a local file, linked or imported |
-| `zotero_get_attachment_path` | Resolve an attachment to its absolute path on disk |
+**Discovery** — `list_tags` `list_saved_searches` `run_saved_search`
 
-**Tags and saved searches**
-| Tool | Purpose |
-| :--- | :--- |
-| `zotero_list_tags` | Tags, optionally scoped to a collection |
-| `zotero_list_saved_searches` | Saved searches and their conditions |
-| `zotero_run_saved_search` | Execute one — something the web API cannot do |
+**System** — `status` `authorize` `list_libraries` `get_item_type_fields`
 
-## Attachment modes
+All names are prefixed `zotero_`. See the **[reference](docs/reference.md)** for
+full signatures.
 
-`zotero_attach_file` takes `mode`:
+## Prior art
 
-- **`linked`** (default) — Zotero records the path. Instant for any file size,
-  nothing is copied, and the file must stay where it is. Linked files do not
-  sync to zotero.org.
-- **`imported`** — Zotero takes its own copy into its storage directory, so the
-  original can move or be deleted and the attachment syncs. This runs the Zotero
-  API's three-phase upload protocol (authorize → transfer → register), all of it
-  over loopback; where the web API would hand the bytes to S3, Zotero receives
-  them itself.
+This project is not a fork. It was written from scratch once Zotero 10 made
+native local writes possible, but it stands on the shoulders of earlier work
+that solved the same problem under tighter constraints:
 
-## Configuration
+- **[54yyyu/zotero-mcp](https://github.com/54yyyu/zotero-mcp)** — the most
+  widely used Zotero MCP server. Rich feature set including semantic search;
+  writes go through `api.zotero.org`.
+- **[cookjohn/zotero-mcp](https://github.com/cookjohn/zotero-mcp)** — a Zotero 7
+  plugin exposing an MCP endpoint from inside Zotero, with vector search.
+- **[Ayanya-0628/zotero-mcp](https://github.com/Ayanya-0628/zotero-mcp)** and
+  **[dzackgarza/zotero-local-write-api](https://github.com/dzackgarza/zotero-local-write-api)**
+  — local-first writes via a companion `.xpi` write endpoint.
+- **[kujenga/zotero-mcp](https://github.com/kujenga/zotero-mcp)** — a lightweight
+  Python server for the Zotero API.
 
-All optional.
+If you need Zotero 7/8/9 support, semantic or vector search, or writes to a
+library you only have cloud access to, those projects remain the right choice.
 
-| Variable | Default | Purpose |
-| :--- | :--- | :--- |
-| `ZOTERO_LOCAL_PORT` | `23119` | Zotero's local server port |
-| `ZOTERO_LOCAL_BASE_URL` | `http://127.0.0.1:<port>` | Full base URL override |
-| `ZOTERO_LOCAL_APP_NAME` | `zotero-native-mcp` | Name shown in the consent dialog |
-| `ZOTERO_LOCAL_AUTO_AUTHORIZE` | `true` | Set `false` to require explicit `zotero_authorize` |
-| `ZOTERO_LOCAL_API_KEY` | — | Pre-provisioned local key, bypassing the key store |
-| `ZOTERO_LOCAL_KEY_STORE` | `~/.config/zotero-native-mcp/keys.json` | Key store path |
-| `ZOTERO_LOCAL_TIMEOUT_MS` | `60000` | Per-request timeout |
+## Contributing
 
-## Development
+Issues and pull requests are welcome. `npm run typecheck && npm run build` must
+pass; `node scripts/smoke.mjs read` exercises the read tools against a live
+Zotero, and `node scripts/smoke.mjs write` the write path (it cleans up after
+itself). See [`evaluation/evaluation.xml`](evaluation/evaluation.xml) for
+question/answer pairs used to check real-world tool use.
 
-```bash
-npm run typecheck            # tsc --noEmit
-npm run build                # compile to build/
-npm run inspect              # build, then open the MCP Inspector
-node scripts/smoke.mjs read  # read-only end-to-end check against a live Zotero
-node scripts/smoke.mjs write # write path; creates and then deletes test data
-```
+## License
 
-`evaluation/evaluation.xml` holds question/answer pairs for exercising the
-server against a real library.
+MIT © David Sosa
 
-## Known limits
+---
 
-These are properties of Zotero's local API, not of this server:
-
-- Batch writes and deletes cap at **50 objects** per call.
-- Group metadata is minimal: names and item counts only, no permissions or
-  ownership (those live on zotero.org).
-- Full text is whatever **Zotero has indexed**; a scanned PDF without OCR has
-  none. Fall back to `zotero_get_attachment_path` and read the file directly.
-- Atom output is not supported, and quicksearch ranking can differ slightly from
-  the web API's.
+<sub>Keywords: Zotero MCP server · Model Context Protocol · Zotero Claude
+integration · Zotero local API · offline reference manager automation ·
+Zotero AI assistant · BibTeX export · academic research tooling · Claude Code
+Zotero · Cursor Zotero</sub>
