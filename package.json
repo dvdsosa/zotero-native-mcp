@@ -56,5 +56,6 @@
   "bugs": {
     "url": "https://github.com/dvdsosa/zotero-native-mcp/issues"
   },
-  "author": "David Sosa"
+  "author": "David Sosa",
+  "mcpName": "io.github.dvdsosa/zotero-native-mcp"
 }
