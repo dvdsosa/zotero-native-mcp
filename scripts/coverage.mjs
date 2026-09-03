@@ -65,25 +65,22 @@ if (searches?.searches?.length) {
   const hits = await run('zotero_run_saved_search', { ...lib, searchKey: s.key, limit: 5 });
   console.log(`  saved search "${s.name}" → ${hits?.totalResults ?? '?'} items`);
 } else {
-  results.set('zotero_run_saved_search', { ok: true, skipped: true, note: 'no saved searches in this library' });
+  results.set('zotero_run_saved_search', {
+    ok: true, skipped: true,
+    note: 'no saved searches — the API cannot create one, so this needs a library that has some',
+  });
 }
 
 // ── Collections, read-only ────────────────────────────────────────────────
 const cols = await run('zotero_list_collections', { ...lib, scope: 'all', limit: 300 });
 const parent = cols?.collections?.find((c) => c.numCollections > 0);
 if (parent) await run('zotero_list_collections', { ...lib, scope: 'children', parentKey: parent.key });
-if (cols?.collections?.length) await run('zotero_get_collection', { ...lib, collectionKey: cols.collections[0].key });
 
 // ── Items, read-only ──────────────────────────────────────────────────────
-const found = await run('zotero_search_items', { ...lib, q: 'a', qmode: 'everything', limit: 5 });
-const withKids = found?.items?.find((i) => i.numChildren > 0) ?? found?.items?.[0];
-if (withKids) {
-  await run('zotero_get_item', { ...lib, itemKey: withKids.key, includeChildren: true });
-  await run('zotero_get_item_children', { ...lib, itemKey: withKids.key, limit: 20 });
-  for (const format of ['bibtex', 'biblatex', 'ris', 'csljson', 'csv', 'bib']) {
-    await run('zotero_export_items', { ...lib, itemKeys: [withKids.key], format, style: 'apa' });
-  }
-}
+// Quicksearch over whatever the library already holds. An empty library is a
+// legitimate state, so nothing below may depend on this returning anything —
+// every tool is exercised again later against objects this script creates.
+await run('zotero_search_items', { ...lib, q: 'a', qmode: 'everything', limit: 5 });
 
 // Full text needs an attachment Zotero has actually indexed; find one.
 let indexed = null;
@@ -98,7 +95,10 @@ if (indexed) {
   console.log(`  full text: ${indexed.data.totalCharacters} chars over ${indexed.data.indexedPages}/${indexed.data.totalPages} pages`);
   await run('zotero_get_attachment_path', { ...lib, itemKey: indexed.key });
 } else {
-  results.set('zotero_get_item_fulltext', { ok: true, skipped: true, note: 'no indexed PDF in this library' });
+  results.set('zotero_get_item_fulltext', {
+    ok: true, skipped: true,
+    note: 'no indexed PDF — Zotero indexes in the background, and a library with no PDFs has none',
+  });
 }
 
 // ── Write cycle, on objects this script creates ───────────────────────────
@@ -180,6 +180,14 @@ if (groupId) {
 const imported = await run('zotero_attach_file', { ...lib, filePath: pdfPath, parentItemKey: itemKey, mode: 'imported', title: 'Imported PDF' });
 console.log(`  imported PDF: contentType=${imported?.contentType} uploaded=${imported?.uploaded} bytes=${imported?.bytes}`);
 await run('zotero_get_attachment_path', { ...lib, itemKey });
+
+// Reads against objects this run created, so coverage does not depend on the
+// library already holding anything. An empty Zotero still reaches every tool.
+await run('zotero_get_collection', { ...lib, collectionKey: colKey });
+await run('zotero_get_item_children', { ...lib, itemKey, limit: 20 });
+for (const format of ['bibtex', 'biblatex', 'ris', 'csljson', 'csv', 'bib']) {
+  await run('zotero_export_items', { ...lib, itemKeys: [itemKey], format, style: 'apa' });
+}
 
 await run('zotero_remove_items_from_collection', { ...lib, itemKeys: [itemKey], collectionKey: colKey });
 await run('zotero_add_items_to_collection', { ...lib, itemKeys: [itemKey], collectionKey: colKey });
