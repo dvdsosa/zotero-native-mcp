@@ -51,7 +51,7 @@ touches the network.
   the read tools work and every write fails.
 - Zotero → **Settings → Advanced** → enable
   **"Allow other applications on this computer to communicate with Zotero"**.
-- Node.js 20+.
+- Node.js 22 or newer. Node 20 reached end of life in April 2026.
 
 ## Tested on
 
@@ -64,12 +64,12 @@ verified, and this table is the honest extent of it.
 |---|---|
 | Operating system | macOS 26.6, Apple Silicon |
 | Zotero | 10.0.1 |
-| Node.js | 26.8 locally; 20, 22 and 24 in CI |
+| Node.js | 26.8 locally; 22, 24 and 26 in CI |
 | MCP client | Claude Code 2.1 |
 | Libraries | Personal **and** group — all 28 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
-Windows × Node 20, 22 and 24**, so portability of the code itself is covered on
+Windows × Node 22, 24 and 26**, so portability of the code itself is covered on
 all three platforms. What no runner can cover is the conversation with a real
 Zotero, since none is installed there.
 
@@ -187,7 +187,7 @@ library you only have cloud access to, those projects remain the right choice.
 ## Contributing
 
 Issues and pull requests are welcome. CI must pass on Linux, macOS and Windows
-across Node 20, 22 and 24.
+across Node 22, 24 and 26.
 
 See **[CONTRIBUTING](docs/CONTRIBUTING.md)** for the development setup, the test
 suite, and the scripts that exercise every tool against a live Zotero.

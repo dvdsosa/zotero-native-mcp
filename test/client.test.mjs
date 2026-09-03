@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { ZoteroLocalClient, libraryPrefix } from '../build/client.js';
-import { startMockZotero } from './helpers/mock-zotero.mjs';
+import { startMockZotero } from '../test-utils/mock-zotero.mjs';
 
 async function withClient(mockOptions, clientOverrides, fn) {
   const mock = await startMockZotero(mockOptions);

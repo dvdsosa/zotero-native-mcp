@@ -11,16 +11,17 @@
     "build"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc",
     "watch": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "start": "node build/index.js",
     "inspect": "npm run build && npx -y @modelcontextprotocol/inspector node build/index.js",
-    "test": "npm run build && node --test test/",
-    "test:unit": "npm run build && node --test test/format.test.mjs test/config.test.mjs test/keystore.test.mjs test/client.test.mjs"
+    "test": "npm run build && node --test",
+    "test:unit": "npm run build && node --test test/format.test.mjs test/config.test.mjs test/keystore.test.mjs test/client.test.mjs test/validation.test.mjs",
+    "postbuild": "node -e \"try{require('fs').chmodSync('build/index.js',0o755)}catch{}\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",

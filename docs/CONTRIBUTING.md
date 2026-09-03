@@ -36,7 +36,8 @@ without going through an assistant.
 | `src/client.ts` | Everything about talking to Zotero: the server-ID handshake, API keys, retries, turning HTTP statuses into useful errors. |
 | `src/errors.ts` | The error types and their remediation text. |
 | `src/format.ts` | Trimming Zotero's responses down before they reach the model. |
-| `test/` | The test suite. `helpers/mock-zotero.mjs` is a stand-in Zotero used by the tests. |
+| `test/` | The test suite. Every file here is discovered and run by `npm test`. |
+| `test-utils/` | Helpers the tests import. Deliberately outside `test/`, so Node's test discovery does not treat them as suites. |
 | `docs/` | This documentation. |
 
 ## 3. Two conventions specific to this project
@@ -63,7 +64,7 @@ npm test
 
 `npm test` runs 71 tests using `node:test`, which ships with Node — there is no
 test framework to install. Five of the six suites need no Zotero at all, because
-`test/helpers/mock-zotero.mjs` imitates Zotero's local API well enough to
+`test-utils/mock-zotero.mjs` imitates Zotero's local API well enough to
 exercise the real protocol:
 
 | Suite | Covers | Needs Zotero |
@@ -138,7 +139,7 @@ is the part that is lost otherwise. `git log` shows the tone.
 ### What happens next
 
 Opening the pull request starts CI: nine jobs covering **Linux, macOS and
-Windows across Node 20, 22 and 24**. All must pass. They run on GitHub's
+Windows across Node 22, 24 and 26**. All must pass. They run on GitHub's
 machines, not yours, and if your change breaks only one combination you will see
 exactly which.
 

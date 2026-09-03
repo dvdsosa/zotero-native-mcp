@@ -14,7 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node: ['20', '22', '24']
+        # Node 20 reached end of life in April 2026. 22 is the active LTS, 24 the
+        # current release, 26 what the project is developed on.
+        node: ['22', '24', '26']
     steps:
       - uses: actions/checkout@v4
 
