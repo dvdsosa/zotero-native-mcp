@@ -95,6 +95,8 @@ export class ZoteroLocalClient {
    * keeps a spiral of single-use keys from taking the whole session down.
    */
   private authorizationAttempts: number[] = [];
+  /** In-flight replacement of a rejected key, shared by every waiting request. */
+  private keyRecovery: Promise<void> | null = null;
 
   constructor(private readonly config: Config) {
     this.keyStore = new KeyStore(config.keyStorePath ?? defaultKeyStorePath());
@@ -116,9 +118,10 @@ export class ZoteroLocalClient {
     if (isWrite && !headers['Zotero-Server-ID']) {
       headers['Zotero-Server-ID'] = await this.getServerId();
     }
+    let keyUsed: string | null = null;
     if (isWrite) {
-      const key = await this.getApiKey();
-      if (key) headers['Zotero-API-Key'] = key;
+      keyUsed = await this.getApiKey();
+      if (keyUsed) headers['Zotero-API-Key'] = keyUsed;
     }
 
     let body: RequestInit['body'];
@@ -176,8 +179,7 @@ export class ZoteroLocalClient {
     // 401: the key is missing, or a single-use key was consumed by an earlier
     // write. Re-authorize once and replay the request.
     if (response.status === 401 && retries.reauthorize && this.config.autoAuthorize) {
-      await this.forgetApiKey();
-      await this.authorize({ force: true });
+      await this.recoverFromRejectedKey(keyUsed);
       return this.dispatch<T>(options, { ...retries, reauthorize: false });
     }
 
@@ -295,9 +297,31 @@ export class ZoteroLocalClient {
     return this.apiKey;
   }
 
-  private async forgetApiKey(): Promise<void> {
-    this.apiKey = null;
-    if (!this.config.apiKey) await this.keyStore.remove(await this.getServerId());
+  /**
+   * Replaces a key the server has rejected.
+   *
+   * Concurrent writes fail together when a key is spent, so several requests
+   * reach this at once. Recovery is serialized: the first request through
+   * discards the rejected key and obtains a new one, and the rest simply wait
+   * for it and retry with whatever it produced. Letting them interleave meant a
+   * later request could clear the key an earlier one had just stored, sending
+   * its own retry out with nothing and failing it for good.
+   */
+  private async recoverFromRejectedKey(rejected: string | null): Promise<void> {
+    if (this.keyRecovery) {
+      await this.keyRecovery;
+      return;
+    }
+    this.keyRecovery = (async () => {
+      // Another request may already have replaced it while this one waited.
+      if (rejected !== null && this.apiKey !== null && this.apiKey !== rejected) return;
+      this.apiKey = null;
+      if (!this.config.apiKey) await this.keyStore.remove(await this.getServerId());
+      await this.authorize({ force: true });
+    })().finally(() => {
+      this.keyRecovery = null;
+    });
+    await this.keyRecovery;
   }
 
   /**

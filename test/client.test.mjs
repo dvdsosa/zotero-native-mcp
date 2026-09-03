@@ -184,6 +184,28 @@ test('concurrent writes collapse onto a single dialog', async () => {
   });
 });
 
+test('staggered concurrent writes all succeed while a key is being obtained', async () => {
+  // Writes that start together fail together and recover together, which is the
+  // easy case. The hard one is a write whose 401 lands while another request is
+  // midway through replacing the key: recovery has to be serialized or that
+  // retry goes out with no key at all and fails for good. Staggering the starts
+  // is what makes the interleaving happen; on a fast machine the unstaggered
+  // version passes even when the race is present.
+  await withClient({}, {}, async (client, mock) => {
+    const writes = [];
+    for (let i = 0; i < 6; i++) {
+      writes.push(
+        new Promise((resolve) => setTimeout(resolve, i * 2)).then(() =>
+          client.request({ method: 'POST', path: '/users/0/items', body: [] })),
+      );
+    }
+    const results = await Promise.allSettled(writes);
+    const rejected = results.filter((r) => r.status === 'rejected');
+    assert.equal(rejected.length, 0,
+      `every write must succeed; ${rejected.length} failed, first: ${rejected[0]?.reason?.message}`);
+  });
+});
+
 test('query parameters are serialized, dropping empty values', async () => {
   await withClient({}, {}, async (client, mock) => {
     await client.request({ path: '/users/0/items', query: { limit: 5, q: '', tag: undefined, sort: 'title' } });
