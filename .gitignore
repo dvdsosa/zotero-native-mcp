@@ -1,0 +1,12 @@
+node_modules/
+build/
+*.log
+.DS_Store
+
+# Local Claude Code / skills tooling — not part of the package
+.claude/
+.agents/
+skills-lock.json
+
+# Private planning notes, not for publication
+zotero-mcp-local-plan.md

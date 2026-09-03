@@ -1,0 +1,31 @@
+{
+  "name": "zotero-native-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Zotero's local HTTP API (127.0.0.1:23119) — 100% offline read/write access to your Zotero library",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "zotero-native-mcp": "build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "watch": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "start": "node build/index.js",
+    "inspect": "npm run build && npx -y @modelcontextprotocol/inspector node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

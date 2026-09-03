@@ -1,0 +1,71 @@
+<!--
+  Evaluation set for zotero-native-mcp.
+
+  These questions measure something the test suite cannot: whether a model,
+  given nothing but the tool descriptions, can chain the right calls and reach a
+  correct answer. It tests the writing, not the code.
+
+  The answers below are PLACEHOLDERS. An evaluation only works against a library
+  whose contents you know, so replace both the questions and the answers with
+  facts from your own before running it — see docs/CONTRIBUTING.md.
+
+  What makes a good question here:
+
+    - Independent      Answerable without having done the previous ones.
+    - Read-only        No question should require a write.
+    - Multi-step       It should take several tool calls, not one lookup.
+    - Verifiable       One unambiguous answer, checkable by string comparison.
+    - Stable           The answer should not drift as the library grows, so
+                       prefer structure and bibliographic facts over counts of
+                       things you keep adding to.
+-->
+<evaluation>
+  <qa_pair>
+    <question>How many collections sit at the root of the personal library, with no parent collection?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the collection named "REPLACE_WITH_A_NESTED_COLLECTION". What is the name of its direct parent collection?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Among the subcollections of "REPLACE_WITH_A_PARENT_COLLECTION", which one contains the most items?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many saved searches are defined in the personal library?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The saved search named "REPLACE_WITH_A_SAVED_SEARCH" filters on a tag. What tag value does its condition look for?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the item titled "REPLACE_WITH_AN_ITEM_TITLE". What is the last name of its first author?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What DOI is recorded for the item titled "REPLACE_WITH_AN_ITEM_TITLE"?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The item titled "REPLACE_WITH_AN_ITEM_TITLE" is filed in exactly one collection. What is that collection's name?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Export the item titled "REPLACE_WITH_AN_ITEM_TITLE" as BibTeX. What is the citation key of the resulting entry?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inside the collection "REPLACE_WITH_A_COLLECTION", how many items have the item type conferencePaper?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many tags in the library begin with "REPLACE_WITH_A_TAG_PREFIX"?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find an attachment whose full text Zotero has indexed. How many pages does it report as indexed?</question>
+    <answer>REPLACE_WITH_YOUR_ANSWER</answer>
+  </qa_pair>
+</evaluation>

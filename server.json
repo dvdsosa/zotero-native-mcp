@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.dvdsosa/zotero-native-mcp",
+  "title": "Zotero Native MCP",
+  "description": "Read and write your local Zotero library over Zotero 10's native local API. Create collections, add items, attach local PDFs and search full text — no plugin, no API key, no cloud.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/dvdsosa/zotero-native-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "zotero-native-mcp",
+      "version": "1.0.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "ZOTERO_LOCAL_PORT",
+          "description": "Port of Zotero's local HTTP server. Defaults to 23119.",
+          "isRequired": false
+        },
+        {
+          "name": "ZOTERO_LOCAL_APP_NAME",
+          "description": "Name shown in Zotero's authorization dialog. Defaults to zotero-native-mcp.",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
