@@ -66,7 +66,7 @@ verified, and this table is the honest extent of it.
 | Zotero | 10.0.1 |
 | Node.js | 26.8 locally; 20, 22 and 24 in CI |
 | MCP client | Claude Code 2.1 |
-| Libraries | Personal **and** group — full read/write cycle in both |
+| Libraries | Personal **and** group — all 24 tools exercised in both |
 
 CI runs the unit and mock-protocol suites across a matrix of **Linux, macOS and
 Windows × Node 20, 22 and 24**, so portability of the code itself is covered on
@@ -187,13 +187,22 @@ local API keys, so the protocol is exercised in CI with no Zotero installed.
 The integration suite skips itself when Zotero is unreachable, which is why CI
 stays green on a runner.
 
-Two checks need a real Zotero and so are not part of `npm test`:
+These need a real Zotero and so are not part of `npm test`:
 
 ```bash
-node scripts/smoke.mjs read    # read tools end to end
-node scripts/smoke.mjs write   # write path; needs a consent dialog, cleans up after itself
-node scripts/smoke.mjs group   # the same write cycle in a group library
+node scripts/smoke.mjs read      # read tools end to end
+node scripts/smoke.mjs write     # write path; needs a consent dialog, cleans up after itself
+node scripts/smoke.mjs group     # the same write cycle in a group library
+node scripts/coverage.mjs        # every tool, with a coverage report
+node scripts/coverage.mjs --group
 ```
+
+`coverage.mjs` calls all 24 tools against a live library and reports which ones
+ran, so a tool cannot quietly go unexercised. It builds its own collection, item
+and attachments, and removes them in a `finally` block so a mid-run failure
+still cleans up. Both libraries currently report **24/24**, except
+`run_saved_search` in the group, which is skipped because that library holds no
+saved searches.
 
 ### Evaluating tool descriptions
 

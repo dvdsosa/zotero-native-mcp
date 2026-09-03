@@ -193,3 +193,35 @@ test('query parameters are serialized, dropping empty values', async () => {
     assert.ok(sent, 'request recorded');
   });
 });
+
+test('authorize reuses a stored key instead of raising another dialog', async () => {
+  await withClient({ validKeys: ['preset'] }, { apiKey: 'preset' }, async (client, mock) => {
+    const result = await client.authorize();
+    assert.equal(result.key, 'preset');
+    assert.equal(mock.authorizeCount(), 0, 'a held key must not trigger a prompt');
+  });
+});
+
+test('authorize({force}) does ask again, even holding a key', async () => {
+  await withClient({ validKeys: ['preset'] }, { apiKey: 'preset' }, async (client, mock) => {
+    await client.authorize({ force: true });
+    assert.equal(mock.authorizeCount(), 1);
+  });
+});
+
+test('a spiral of single-use keys is cut off before Zotero rate-limits', async () => {
+  await withClient({ authorizeResponse: { allow: true, remember: false } }, {}, async (client, mock) => {
+    // Every write consumes its key, so each one needs a fresh dialog.
+    let lastError;
+    for (let i = 0; i < 6; i++) {
+      try {
+        await client.request({ method: 'POST', path: '/users/0/items', body: [] });
+      } catch (error) { lastError = error; break; }
+    }
+    assert.ok(lastError, 'the client must stop on its own');
+    assert.match(lastError.message, /Stopped after \d+ authorization requests/);
+    assert.match(lastError.toToolText(), /Always Allow/);
+    // Zotero's own ceiling is five per minute; we must stop below it.
+    assert.ok(mock.authorizeCount() < 5, `stopped after ${mock.authorizeCount()} prompts`);
+  });
+});

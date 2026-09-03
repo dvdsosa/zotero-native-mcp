@@ -91,24 +91,40 @@ export function registerSystemTools(server: McpServer, client: ZoteroLocalClient
       'refuses. Tell the user to expect the dialog, and to pick "Always Allow" for a session that ' +
       'will perform several writes. The key is stored locally and reused; write tools also ' +
       're-authorize on their own when a single-use key is spent, so calling this manually is only ' +
-      'needed to grant access up front.',
-    inputSchema: {},
+      'needed to grant access up front. Calling it when a key is already stored reuses that key ' +
+      'and shows no dialog.',
+    inputSchema: {
+      force: z
+        .boolean()
+        .default(false)
+        .describe(
+          'Request a new key even though one is already stored. Rarely needed: a stored key is ' +
+            'reused, and replacing a persistent key with a single-use one makes things worse.',
+        ),
+    },
     outputSchema: {
       authorized: z.boolean(),
       persistent: z
         .boolean()
-        .describe('True when the user chose "Always Allow"; false keys are consumed by the next write.'),
+        .describe('True when the key persists; false keys are consumed by the next write.'),
+      alreadyHeld: z.boolean().describe('True when an existing stored key was reused and no dialog appeared.'),
       message: z.string(),
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
-    handler: async () => {
-      const result = await client.authorize();
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+    handler: async ({ force }) => {
+      const held = await client.hasApiKey();
+      const result = await client.authorize({ force });
+      const alreadyHeld = held && !force;
       return ok({
         authorized: true,
         persistent: result.remember,
-        message: result.remember
-          ? 'Write access granted persistently. The key is stored and will be reused.'
-          : 'Write access granted for a single write. The next write consumes the key; a new dialog will appear after that.',
+        alreadyHeld,
+        message: alreadyHeld
+          ? 'A key was already stored and has been reused; no dialog was shown.'
+          : result.remember
+            ? 'Write access granted persistently. The key is stored and will be reused.'
+            : 'Write access granted for a single write only. The next write consumes this key and ' +
+              'Zotero will prompt again — ask the user for "Always Allow" to stop that.',
       });
     },
   });

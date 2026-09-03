@@ -24,11 +24,18 @@ import { Config } from './config.js';
 import { KeyStore, defaultKeyStorePath } from './keystore.js';
 import {
   ZoteroAuthorizationDeniedError,
+  ZoteroError,
   ZoteroHttpError,
   ZoteroUnreachableError,
 } from './errors.js';
 
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * Self-imposed ceiling, below Zotero's own limit of five per minute, so the
+ * client surfaces a useful error before Zotero starts refusing everything.
+ */
+const MAX_AUTHORIZATIONS_PER_MINUTE = 3;
 
 /** Which library a request targets. Personal library when groupId is absent. */
 export interface LibraryRef {
@@ -81,6 +88,13 @@ export class ZoteroLocalClient {
   private readonly keyStore: KeyStore;
   /** Serializes concurrent authorize attempts so tools never stack dialogs. */
   private pendingAuthorization: Promise<AuthorizationResult> | null = null;
+  /**
+   * Timestamps of recent authorization attempts. Zotero allows five prompts a
+   * minute and then rate-limits; once that happens every write fails, including
+   * ones that had nothing to do with authorization. Stopping short of the limit
+   * keeps a spiral of single-use keys from taking the whole session down.
+   */
+  private authorizationAttempts: number[] = [];
 
   constructor(private readonly config: Config) {
     this.keyStore = new KeyStore(config.keyStorePath ?? defaultKeyStorePath());
@@ -163,7 +177,7 @@ export class ZoteroLocalClient {
     // write. Re-authorize once and replay the request.
     if (response.status === 401 && retries.reauthorize && this.config.autoAuthorize) {
       await this.forgetApiKey();
-      await this.authorize();
+      await this.authorize({ force: true });
       return this.dispatch<T>(options, { ...retries, reauthorize: false });
     }
 
@@ -290,7 +304,14 @@ export class ZoteroLocalClient {
    * Requests write access. Raises a modal in Zotero with Allow / Always Allow /
    * Deny; the returned key is persisted so "Always Allow" survives restarts.
    */
-  async authorize(): Promise<AuthorizationResult> {
+  async authorize(options: { force?: boolean } = {}): Promise<AuthorizationResult> {
+    // A stored key is already good enough. Asking again would raise a dialog for
+    // nothing, and worse, a "Allow" answer would replace a working persistent
+    // key with a single-use one.
+    if (!options.force) {
+      const existing = await this.getApiKey();
+      if (existing) return { key: existing, remember: true };
+    }
     // Collapse concurrent callers onto one dialog.
     if (this.pendingAuthorization) return this.pendingAuthorization;
     this.pendingAuthorization = this.performAuthorization().finally(() => {
@@ -300,6 +321,19 @@ export class ZoteroLocalClient {
   }
 
   private async performAuthorization(): Promise<AuthorizationResult> {
+    const now = Date.now();
+    this.authorizationAttempts = this.authorizationAttempts.filter((t) => now - t < 60_000);
+    if (this.authorizationAttempts.length >= MAX_AUTHORIZATIONS_PER_MINUTE) {
+      throw new ZoteroError(
+        `Stopped after ${MAX_AUTHORIZATIONS_PER_MINUTE} authorization requests in a minute.`,
+        'This many prompts in a row means the granted key is single-use: Zotero issues one when ' +
+          'the user picks "Allow", and it is spent by the first write, so every following write ' +
+          'needs a new dialog. Ask the user to run zotero_authorize once and press "Always Allow". ' +
+          'Continuing would hit Zotero\'s own rate limit and make every write fail, not just these.',
+      );
+    }
+    this.authorizationAttempts.push(now);
+
     const serverId = await this.getServerId();
     let response: Response;
     try {
