@@ -101,6 +101,7 @@ export const listOutputShape = {
   totalResults: z.number().nullable(),
   returned: z.number(),
   start: z.number(),
+  hasMore: z.boolean(),
   nextStart: z.number().nullable(),
 };
 

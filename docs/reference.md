@@ -20,8 +20,8 @@ including the `library` block and self/alternate `links`, which costs
 substantially more tokens.
 
 **Paging.** List tools accept `limit` (1–500, default 50) and `start`, and
-return `totalResults`, `returned`, `start` and `nextStart`. When `nextStart` is
-`null` there is nothing more to fetch.
+return `totalResults`, `returned`, `start`, `hasMore` and `nextStart`. When `hasMore` is
+`false` there is nothing more to fetch, and `nextStart` is `null`.
 
 **Versions.** Tools that modify an object accept `expectedVersion`. Omit it and
 the current version is read automatically, making the change a single call. Pass

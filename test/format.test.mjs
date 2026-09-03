@@ -64,13 +64,23 @@ test('compactList maps every entry', () => {
 });
 
 test('pageInfo reports a cursor when more results remain', () => {
-  assert.deepEqual(pageInfo(50, 0, 137), { totalResults: 137, returned: 50, start: 0, nextStart: 50 });
+  assert.deepEqual(pageInfo(50, 0, 137),
+    { totalResults: 137, returned: 50, start: 0, hasMore: true, nextStart: 50 });
 });
 
 test('pageInfo reports no cursor on the last page', () => {
-  assert.deepEqual(pageInfo(37, 100, 137), { totalResults: 137, returned: 37, start: 100, nextStart: null });
+  assert.deepEqual(pageInfo(37, 100, 137),
+    { totalResults: 137, returned: 37, start: 100, hasMore: false, nextStart: null });
 });
 
 test('pageInfo copes with an unknown total', () => {
-  assert.deepEqual(pageInfo(10, 0, null), { totalResults: null, returned: 10, start: 0, nextStart: null });
+  assert.deepEqual(pageInfo(10, 0, null),
+    { totalResults: null, returned: 10, start: 0, hasMore: false, nextStart: null });
+});
+
+test('hasMore and nextStart never disagree', () => {
+  for (const [returned, start, total] of [[50, 0, 137], [37, 100, 137], [10, 0, null], [0, 0, 0]]) {
+    const page = pageInfo(returned, start, total);
+    assert.equal(page.hasMore, page.nextStart !== null);
+  }
 });

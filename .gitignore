@@ -5,3 +5,8 @@ build/
 
 # Local Claude Code tooling
 .claude/
+
+# Local secrets — never commit (the template is tracked deliberately)
+.env
+.env.*
+!.env.example

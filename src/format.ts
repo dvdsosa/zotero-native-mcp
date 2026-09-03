@@ -60,14 +60,22 @@ export function pageInfo(
   returned: number,
   start: number,
   totalResults: number | null,
-): { totalResults: number | null; returned: number; start: number; nextStart: number | null } {
+): {
+  totalResults: number | null;
+  returned: number;
+  start: number;
+  hasMore: boolean;
+  nextStart: number | null;
+} {
   const total = totalResults ?? null;
   const consumed = start + returned;
+  const hasMore = total !== null && consumed < total;
   return {
     totalResults: total,
     returned,
     start,
-    nextStart: total !== null && consumed < total ? consumed : null,
+    hasMore,
+    nextStart: hasMore ? consumed : null,
   };
 }
 
