@@ -174,24 +174,4 @@ exactly which.
 
 ---
 
-## Appendix, evaluating tool descriptions
-
-*Maintainers only. This needs a paid API key and a tool that is not part of this
-repository; nothing in a normal contribution requires it.*
-
-[`../evaluation/evaluation.xml`](../evaluation/evaluation.xml) holds 12 question
-and answer pairs about a real Zotero library. Running them measures something no
-unit test can: whether a model, given nothing but the tool descriptions, can
-reach the right answer. It tests the writing rather than the code.
-
-The runner is not in this repository: it is `evaluation.py`, shipped with
-Anthropic's `mcp-builder` skill, which you install separately. Invoke it from a
-checkout of this repository so the relative paths resolve, with
-`ANTHROPIC_BASE_URL` pointed at any endpoint that speaks the Anthropic Messages
-API, [`../.env.example`](../.env.example) lists the variables. The answers in
-the XML describe one particular library, so replace them with facts from yours
-before trusting the score.
-
----
-
 <p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>

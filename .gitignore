@@ -8,7 +8,6 @@ build/
 .agents/
 skills-lock.json
 
-# Local secrets, never commit (the template is tracked deliberately)
+# Local secrets, never committed
 .env
 .env.*
-!.env.example
