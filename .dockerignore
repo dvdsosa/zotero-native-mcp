@@ -1,0 +1,12 @@
+node_modules
+build
+.git
+.github
+docs
+test
+test-utils
+scripts
+evaluation
+*.md
+.env
+.env.*

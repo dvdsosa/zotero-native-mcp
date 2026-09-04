@@ -38,6 +38,25 @@ that lists every tool, shows its schema, and lets you call one by hand and read
 the raw response. It is the quickest way to see what a tool really returns
 without going through an assistant.
 
+### Running it in a container
+
+There is a `Dockerfile`, used mainly so directories that index MCP servers can
+build and introspect this one reproducibly. It is not the recommended way to run
+the server.
+
+If you do want it, the container has to share the host's network:
+
+```bash
+docker build -t zotero-native-mcp .
+docker run -i --rm --network host zotero-native-mcp
+```
+
+Pointing it at `host.docker.internal` instead does not work. Zotero guards its
+local API against DNS rebinding and answers only requests whose `Host` header is
+`127.0.0.1` or `localhost`, returning `400` to anything else. Sharing the host's
+network makes `127.0.0.1` inside the container mean the machine running Zotero,
+which is what satisfies that check.
+
 ## 2. Find the file you need
 
 | Where | What lives there |
