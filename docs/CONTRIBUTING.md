@@ -1,3 +1,9 @@
+<!-- The link at the foot of this file is absolute on purpose. GitHub renders
+     CONTRIBUTING.md in a special view at ?tab=contributing-ov-file, outside its
+     own directory, where a relative ../README.md resolves to a broken URL. The
+     other documents here are only ever rendered as ordinary blobs, where
+     relative links work. -->
+
 # Contributing
 
 Never contributed to an open-source project before? That is fine. This page is
@@ -174,4 +180,4 @@ exactly which.
 
 ---
 
-<p align="center"><a href="../README.md">⬅ <b>Back to the main README</b></a></p>
+<p align="center"><a href="https://github.com/dvdsosa/zotero-native-mcp#readme">⬅ <b>Back to the main README</b></a></p>
