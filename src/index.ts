@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   const client = new ZoteroLocalClient(config);
 
   const server = new McpServer(
-    { name: 'zotero-native-mcp', version: '1.0.0' },
+    { name: 'zotero-native-mcp', version: '1.0.2' },
     {
       instructions: [
         'Tools for reading and writing the local Zotero library over Zotero\'s own local API.',
