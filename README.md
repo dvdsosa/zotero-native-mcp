@@ -6,6 +6,7 @@
 [![npm](https://img.shields.io/npm/v/zotero-native-mcp)](https://www.npmjs.com/package/zotero-native-mcp)
 [![CI](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/dvdsosa/zotero-native-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23212085.svg)](https://doi.org/10.5281/zenodo.23212085)
 
 Connect Zotero to Claude, Claude Code, Cursor, or any [Model Context Protocol](https://modelcontextprotocol.io)
 client. Your assistant can search your library, read PDF full text, create
