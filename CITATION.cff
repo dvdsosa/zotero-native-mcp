@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "zotero-native-mcp: an MCP server for Zotero 10+ over its native local API"
+abstract: >-
+  An MCP (Model Context Protocol) server that reads and writes a Zotero 10+
+  library entirely offline through Zotero's native local API, with no Zotero
+  plugin, no zotero.org API key and no cloud round trip. It lets AI assistants
+  search a library, read PDF full text, create collections, add references and
+  attach local PDFs.
+authors:
+  - family-names: Sosa Trejo
+    given-names: David
+    orcid: "https://orcid.org/0000-0002-6337-8698"
+    affiliation: "Universidad de Las Palmas de Gran Canaria"
+repository-code: "https://github.com/dvdsosa/zotero-native-mcp"
+url: "https://www.npmjs.com/package/zotero-native-mcp"
+license: MIT
+version: 1.0.2
+date-released: "2026-10-07"
+keywords:
+  - zotero
+  - model context protocol
+  - mcp
+  - reference management
+  - bibliography
+  - research tools
+  - ai agents
